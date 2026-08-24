@@ -483,6 +483,11 @@
       <label for="currentP">Saldo atual da principal (US$)</label>
       <input type="number" id="currentP" value="1850" step="1">
     </div>
+    <div class="current-input" style="margin-top:14px;">
+      <label for="currentSReal">Saldo atual real da secundária (US$) — opcional</label>
+      <input type="number" id="currentSReal" step="1" placeholder="Deixa em branco para usar o valor teórico da curva">
+      <p style="font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.4;">Preenche quando a secundária não acompanhou perfeitamente a principal na conta real (ex.: stops/takes incorretos). O desvio e a entrada sugerida passam a ser recalculados a partir deste saldo real.</p>
+    </div>
     <div class="current-results" id="currentResults"></div>
   </div>
 
@@ -743,13 +748,41 @@
     const P = Math.max(0, Praw);
     const r = computeRow(P, p, opN);
     const sMaxPossible = finalS(0, p);
-    const podePerder = r.final;
-    const podeGanhar = Math.max(0, sMaxPossible - r.final);
 
     // suggested risk/target: secondary movement across one interval step from current point
-    const stepUp = finalS(Math.min(rangeEnd, P + p.interval), p);
-    const suggested = Math.abs(r.final - stepUp) || (r.final / Math.max(1,opN));
+    const stepTarget = finalS(Math.min(rangeEnd, P + p.interval), p);
 
+    // optional: real (actual) secondary balance, entered manually when the real
+    // account has drifted from the theoretical curve (e.g. wrong stops/takes)
+    const SrealRaw = $('currentSReal').value;
+    const hasReal = SrealRaw.trim() !== '' && !isNaN(parseFloat(SrealRaw));
+    const Sreal = hasReal ? Math.max(0, parseFloat(SrealRaw)) : null;
+
+    if(hasReal){
+      const desvio = Sreal - r.final;
+      const desvioClass = desvio > 0.005 ? 'pos' : (desvio < -0.005 ? 'neg' : 'neu');
+      const podePerderReal = Sreal;
+      const podeGanharReal = Math.max(0, sMaxPossible - Sreal);
+      // recalibrated entry: distance from the REAL current balance to where the
+      // curve should be after one more interval step of principal movement
+      const suggestedReal = Math.abs(Sreal - stepTarget) || (Sreal / Math.max(1,opN));
+
+      container.innerHTML = `
+        <div class="cr"><div class="cr-label">Resultado da principal</div><div class="cr-val ${r.resultadoP>=0?'pos':'neg'}">${fmtSigned(r.resultadoP)}</div></div>
+        <div class="cr"><div class="cr-label">Saldo teórico — secundária (curva)</div><div class="cr-val" style="color:var(--secundaria)">${fmt(r.final)}</div></div>
+        <div class="cr"><div class="cr-label">Saldo real informado — secundária</div><div class="cr-val" style="color:var(--secundaria)">${fmt(Sreal)}</div></div>
+        <div class="cr"><div class="cr-label">Desvio (real − teórico)</div><div class="cr-val ${desvioClass}">${fmtSigned(desvio)}</div></div>
+        <div class="cr"><div class="cr-label">Secundária ainda pode perder (real)</div><div class="cr-val neg">${fmt(podePerderReal)}</div></div>
+        <div class="cr"><div class="cr-label">Secundária ainda pode ganhar (real)</div><div class="cr-val pos">${fmt(podeGanharReal)}</div></div>
+        <div class="cr"><div class="cr-label">Entrada recalibrada (RR 1:1)</div><div class="cr-val">${fmt(suggestedReal)}</div></div>
+        <div class="cr"><div class="cr-label">RR</div><div class="cr-val">1 : 1</div></div>
+      `;
+      return;
+    }
+
+    const podePerder = r.final;
+    const podeGanhar = Math.max(0, sMaxPossible - r.final);
+    const suggested = Math.abs(r.final - stepTarget) || (r.final / Math.max(1,opN));
     const dirClass = r.direcao === 'Ganho' ? 'pos' : (r.direcao === 'Perda' ? 'neg' : 'neu');
 
     container.innerHTML = `
@@ -768,15 +801,20 @@
     const Praw = parseFloat($('currentP').value);
     const P = isNaN(Praw) ? p.pCapital : Math.max(0, Praw);
     const r = computeRow(P, p, opN);
+
+    const SrealRaw = $('currentSReal').value;
+    const hasReal = SrealRaw.trim() !== '' && !isNaN(parseFloat(SrealRaw));
+    const mudancaSDisplay = hasReal ? (Math.max(0, parseFloat(SrealRaw)) - p.sCapital) : r.mudancaS;
+
     const pctP = Math.min(100, Math.max(0, (Math.abs(r.resultadoP) / p.pObjetivo) * 50));
-    const pctS = Math.min(100, Math.max(0, (Math.abs(r.mudancaS) / (p.sCapital + p.sObjetivo)) * 50));
-    $('fillP').style.width = (r.resultadoP >= 0 ? pctP : pctP) + '%';
+    const pctS = Math.min(100, Math.max(0, (Math.abs(mudancaSDisplay) / (p.sCapital + p.sObjetivo)) * 50));
+    $('fillP').style.width = pctP + '%';
     $('fillP').style.background = r.resultadoP >= 0
       ? 'linear-gradient(90deg,var(--principal-dim),var(--principal))'
       : 'linear-gradient(90deg,var(--principal-dim),var(--neg))';
     $('fillS').style.width = pctS + '%';
     $('figP').textContent = fmtSigned(r.resultadoP) + ' (principal)';
-    $('figS').textContent = fmtSigned(r.mudancaS) + ' (secundária)';
+    $('figS').textContent = fmtSigned(mudancaSDisplay) + (hasReal ? ' (secundária real)' : ' (secundária)');
   }
 
   // wire up all inputs
