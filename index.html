@@ -495,6 +495,7 @@
 
 <footer>
   Saldo = dinheiro existente na conta · Resultado = lucro ou prejuízo em relação ao capital inicial. Aplicação 100% local, sem backend.
+  Os dados inseridos ficam guardados automaticamente neste navegador. <a href="#" id="clearStateBtn" style="text-decoration:underline;">Limpar dados guardados</a>
 </footer>
 
 <script>
@@ -507,6 +508,41 @@
   const fmtSigned = (n) => (n > 0 ? '+' : '') + fmt(n);
 
   let chart = null;
+
+  // ---- persistence (localStorage) ----
+  const STORAGE_KEY = 'espelho_state_v1';
+  const PERSISTED_IDS = ['pCapital','pObjetivo','pPerdaMax','interval','sCapital','sObjetivo','sPerdaMax','fixedValue','opCount','opCountCustom','currentP','currentSReal'];
+  function saveState(){
+    try{
+      const state = {};
+      PERSISTED_IDS.forEach(id => { state[id] = $(id).value; });
+      state.fixedEnabled = fixedEnabled;
+      state.fixedMode = getFixedMode();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }catch(e){ /* localStorage indisponível — ignora silenciosamente */ }
+  }
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return;
+      const state = JSON.parse(raw);
+      PERSISTED_IDS.forEach(id => {
+        if(state[id] !== undefined && state[id] !== '') $(id).value = state[id];
+      });
+      if(state.fixedMode){
+        const radio = document.querySelector(`input[name="fixedMode"][value="${state.fixedMode}"]`);
+        if(radio) radio.checked = true;
+      }
+      opCountCustomWrapSync();
+      if(state.fixedEnabled) setFixedEnabled(true);
+    }catch(e){ /* dados guardados corrompidos ou indisponíveis — ignora */ }
+  }
+  function opCountCustomWrapSync(){
+    $('opCountCustomWrap').classList.toggle('hidden', $('opCount').value !== 'custom');
+  }
+  function clearState(){
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  }
 
   // ---- fixed value toggle ----
   const fixedToggle = $('fixedToggle');
@@ -736,6 +772,7 @@
 
     renderCurrent(p, opN, rangeEnd);
     renderBalanceBar(p, opN);
+    saveState();
   }
 
   function renderCurrent(p, opN, rangeEnd){
@@ -823,6 +860,18 @@
     el.addEventListener('change', recalc);
   });
 
+  const clearBtn = document.getElementById('clearStateBtn');
+  if(clearBtn){
+    clearBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if(confirm('Limpar todos os dados guardados neste navegador e repor os valores predefinidos?')){
+        clearState();
+        location.reload();
+      }
+    });
+  }
+
+  loadState();
   recalc();
 })();
 </script>
