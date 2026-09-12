@@ -1,926 +1,794 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Espelho — Simulador de Contas Espelhadas</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#0a0d12;
-    --panel:#12161f;
-    --panel-2:#171c27;
-    --line:#232a38;
-    --text:#e7eaf2;
-    --muted:#8b93a7;
-    --principal:#4c8dff;
-    --principal-dim:#2a3f66;
-    --secundaria:#f5a623;
-    --secundaria-dim:#5a4522;
-    --pos:#34d399;
-    --neg:#f87171;
-    --radius:10px;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:'Space Grotesk',system-ui,sans-serif;
-    line-height:1.4;
-    padding:0 0 60px;
-  }
-  .mono{font-family:'JetBrains Mono',monospace;}
-  a{color:var(--principal);text-decoration:none;cursor:pointer;}
-  a:hover{text-decoration:underline;}
-
-  header{
-    padding:28px 20px 18px;
-    max-width:1180px;
-    margin:0 auto;
-  }
-  .eyebrow{
-    font-family:'JetBrains Mono',monospace;
-    font-size:11px;
-    letter-spacing:.16em;
-    text-transform:uppercase;
-    color:var(--muted);
-    margin:0 0 8px;
-  }
-  h1{
-    font-size:clamp(24px,4vw,34px);
-    font-weight:700;
-    margin:0 0 6px;
-    letter-spacing:-0.01em;
-  }
-  .sub{
-    color:var(--muted);
-    font-size:14px;
-    max-width:640px;
-    margin:0;
-  }
-
-  /* signature balance bar */
-  .balance-wrap{
-    max-width:1180px;
-    margin:22px auto 0;
-    padding:0 20px;
-  }
-  .balance-card{
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:18px 20px;
-  }
-  .balance-labels{
-    display:flex;
-    justify-content:space-between;
-    font-family:'JetBrains Mono',monospace;
-    font-size:12px;
-    color:var(--muted);
-    margin-bottom:10px;
-  }
-  .balance-labels b{color:var(--text);font-weight:600;}
-  .balance-track{
-    position:relative;
-    height:34px;
-    background:var(--panel-2);
-    border-radius:8px;
-    overflow:hidden;
-    display:flex;
-    border:1px solid var(--line);
-  }
-  .balance-fill-p{
-    background:linear-gradient(90deg,var(--principal-dim),var(--principal));
-    height:100%;
-    transition:width .25s ease;
-  }
-  .balance-fill-s{
-    background:linear-gradient(90deg,var(--secundaria-dim),var(--secundaria));
-    height:100%;
-    margin-left:auto;
-    transition:width .25s ease;
-  }
-  .balance-mid{
-    position:absolute;
-    left:50%;
-    top:0;bottom:0;
-    width:1px;
-    background:rgba(255,255,255,.18);
-  }
-  .balance-figures{
-    display:flex;
-    justify-content:space-between;
-    margin-top:10px;
-    font-family:'JetBrains Mono',monospace;
-    font-size:13px;
-  }
-  .balance-figures .p{color:var(--principal);}
-  .balance-figures .s{color:var(--secundaria);}
-
-  main{
-    max-width:1180px;
-    margin:0 auto;
-    padding:0 20px;
-  }
-
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    gap:16px;
-    margin-top:24px;
-  }
-  .panel{
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:18px;
-  }
-  .panel h2{
-    font-size:13px;
-    text-transform:uppercase;
-    letter-spacing:.08em;
-    margin:0 0 14px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-  }
-  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
-  .dot.p{background:var(--principal);}
-  .dot.s{background:var(--secundaria);}
-  .dot.f{background:var(--muted);}
-
-  label{
-    display:block;
-    font-size:12px;
-    color:var(--muted);
-    margin:12px 0 5px;
-  }
-  label:first-of-type{margin-top:0;}
-  input[type="number"],select{
-    width:100%;
-    background:var(--panel-2);
-    border:1px solid var(--line);
-    color:var(--text);
-    border-radius:7px;
-    padding:9px 10px;
-    font-family:'JetBrains Mono',monospace;
-    font-size:14px;
-  }
-  input[type="number"]:focus,select:focus,input[type="radio"]:focus-visible,button:focus-visible{
-    outline:2px solid var(--principal);
-    outline-offset:1px;
-  }
-  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-
-  .toggle-row{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-top:4px;
-  }
-  .switch{
-    position:relative;
-    width:42px;height:24px;
-    background:var(--panel-2);
-    border:1px solid var(--line);
-    border-radius:999px;
-    cursor:pointer;
-    flex-shrink:0;
-  }
-  .switch.on{background:var(--principal-dim);border-color:var(--principal);}
-  .switch::after{
-    content:'';
-    position:absolute;
-    top:2px;left:2px;
-    width:18px;height:18px;
-    background:var(--muted);
-    border-radius:50%;
-    transition:transform .15s ease,background .15s ease;
-  }
-  .switch.on::after{transform:translateX(18px);background:var(--principal);}
-
-  .radio-group{margin-top:8px;display:flex;flex-direction:column;gap:8px;}
-  .radio-opt{
-    display:flex;
-    gap:8px;
-    align-items:flex-start;
-    font-size:12.5px;
-    color:var(--muted);
-    cursor:pointer;
-  }
-  .radio-opt input{margin-top:3px;}
-  .radio-opt b{color:var(--text);font-weight:600;}
-  .fixed-fields{margin-top:10px;}
-  .fixed-fields.hidden{display:none;}
-
-  .op-count-custom{margin-top:8px;}
-  .op-count-custom.hidden{display:none;}
-
-  /* key points */
-  .keypoints{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-    gap:12px;
-    margin-top:24px;
-  }
-  .kp{
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-left:3px solid var(--principal);
-    border-radius:var(--radius);
-    padding:14px 16px;
-  }
-  .kp .kp-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
-  .kp .kp-main{font-family:'JetBrains Mono',monospace;font-size:20px;margin-top:6px;}
-  .kp .kp-sub{font-size:12px;color:var(--muted);margin-top:4px;}
-
-  h3{
-    font-size:15px;
-    margin:32px 0 12px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    color:var(--text);
-  }
-  h3 .n{
-    font-family:'JetBrains Mono',monospace;
-    font-size:11px;
-    color:var(--muted);
-    border:1px solid var(--line);
-    border-radius:4px;
-    padding:1px 6px;
-  }
-
-  .chart-panel{
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:16px;
-    margin-top:8px;
-  }
-  .chart-panel canvas{max-height:340px;}
-
-  .table-wrap{
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    overflow-x:auto;
-    margin-top:8px;
-  }
-  table{
-    width:100%;
-    border-collapse:collapse;
-    font-family:'JetBrains Mono',monospace;
-    font-size:12.5px;
-    min-width:760px;
-  }
-  th,td{
-    text-align:right;
-    padding:9px 12px;
-    white-space:nowrap;
-  }
-  th:first-child,td:first-child{text-align:left;}
-  thead th{
-    color:var(--muted);
-    font-weight:500;
-    text-transform:uppercase;
-    font-size:10.5px;
-    letter-spacing:.04em;
-    border-bottom:1px solid var(--line);
-    position:sticky;top:0;
-    background:var(--panel);
-  }
-  tbody tr{border-bottom:1px solid var(--line);}
-  tbody tr:last-child{border-bottom:none;}
-  tbody tr.milestone{background:rgba(76,141,255,0.06);}
-  .pos{color:var(--pos);}
-  .neg{color:var(--neg);}
-  .neu{color:var(--muted);}
-
-  .current-panel{
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:18px;
-    margin-top:8px;
-  }
-  .current-input{max-width:280px;}
-  .current-results{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-    gap:10px;
-    margin-top:18px;
-  }
-  .cr{
-    background:var(--panel-2);
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:12px 14px;
-  }
-  .cr .cr-label{font-size:11px;color:var(--muted);}
-  .cr .cr-val{font-family:'JetBrains Mono',monospace;font-size:16px;margin-top:4px;}
-
-  .error-banner{
-    background:rgba(248,113,113,0.1);
-    border:1px solid rgba(248,113,113,0.4);
-    color:#ffb4b4;
-    border-radius:var(--radius);
-    padding:14px 16px;
-    margin-top:20px;
-    font-size:13.5px;
-    display:none;
-  }
-  .error-banner.show{display:block;}
-  .error-banner ul{margin:6px 0 0;padding-left:18px;}
-
-  footer{
-    max-width:1180px;
-    margin:40px auto 0;
-    padding:16px 20px 0;
-    border-top:1px solid var(--line);
-    color:var(--muted);
-    font-size:11.5px;
-  }
-
-  @media (max-width:640px){
-    .row2{grid-template-columns:1fr;}
-    table{min-width:640px;}
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1e40af">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Forex Manager">
+    <meta name="description" content="Gerencie suas contas Forex com precisão">
+    <link rel="manifest" href="data:application/json,{%22name%22:%22Forex Account Manager%22,%22short_name%22:%22Forex Manager%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%231e40af%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27%3E%3Crect fill=%27%231e40af%27 width=%27192%27 height=%27192%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 font-size=%27100%27 font-weight=%27bold%27 fill=%27white%27 text-anchor=%27middle%27 dominant-baseline=%27middle%27%3E💱%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22192x192%22,%22type%22:%22image/svg+xml%22}]}">
+    <title>Forex Account Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #ea580c;
+            --surface-0: #f8fafc;
+            --surface-1: #f1f5f9;
+            --surface-2: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+            --border-strong: #cbd5e1;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --surface-0: #0f172a;
+                --surface-1: #1e293b;
+                --surface-2: #334155;
+                --text-primary: #f8fafc;
+                --text-secondary: #cbd5e1;
+                --border: #475569;
+                --border-strong: #64748b;
+            }
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--surface-0);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .container {
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 1rem;
+            padding-bottom: 2rem;
+        }
+        
+        .header {
+            margin-bottom: 2rem;
+            text-align: center;
+            padding-top: env(safe-area-inset-top);
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .accounts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .account-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        .account-card:active {
+            transform: scale(0.98);
+        }
+        
+        .account-card.active {
+            border: 2px solid var(--primary);
+            background: linear-gradient(135deg, rgba(30, 64, 175, 0.05), transparent);
+        }
+        
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .account-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .account-badge {
+            background: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .balance-display {
+            background: var(--surface-1);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .balance-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .balance-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .balance-positive {
+            color: var(--success);
+        }
+        
+        .balance-negative {
+            color: var(--danger);
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            font-size: 12px;
+        }
+        
+        .stat {
+            text-align: center;
+            padding: 0.75rem;
+            background: var(--surface-1);
+            border-radius: 6px;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .button {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-block;
+            text-align: center;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:active {
+            background: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background: var(--surface-1);
+            color: var(--text-primary);
+            border: 1px solid var(--border-strong);
+        }
+        
+        .btn-secondary:active {
+            background: var(--border);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:active {
+            background: #b91c1c;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:active {
+            background: #15803d;
+        }
+        
+        .btn-small {
+            padding: 0.5rem 0.75rem;
+            font-size: 12px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--surface-2);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 90%;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--surface-1);
+            color: var(--text-primary);
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--surface-2);
+        }
+        
+        select.form-input {
+            cursor: pointer;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .form-actions button {
+            flex: 1;
+        }
+        
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+        
+        .transaction-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .transaction-type {
+            font-weight: 500;
+        }
+        
+        .transaction-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .transaction-amount {
+            font-weight: 600;
+        }
+        
+        .transactions-list {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .transactions-empty {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .action-buttons button {
+            flex: 1;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .tab {
+            padding: 0.75rem 1rem;
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: all 0.2s;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .tab:active {
+            opacity: 0.7;
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .total-balance {
+            background: linear-gradient(135deg, var(--primary), #0ea5e9);
+            color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .total-label {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        
+        .total-value {
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .settings-section {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        .settings-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+    </style>
 </head>
 <body>
-
-<header>
-  <p class="eyebrow">Simulador · Relação Inversa de Contas</p>
-  <h1>Espelho</h1>
-  <p class="sub">Quando a conta principal ganha, a secundária perde — e vice-versa. Ajuste os parâmetros abaixo e a curva, a tabela e o gráfico recalculam na hora.</p>
-</header>
-
-<div class="balance-wrap">
-  <div class="balance-card">
-    <div class="balance-labels">
-      <span><b>Principal</b> — resultado atual</span>
-      <span><b>Secundária</b> — resultado atual</span>
-    </div>
-    <div class="balance-track">
-      <div class="balance-fill-p" id="fillP" style="width:50%"></div>
-      <div class="balance-mid"></div>
-      <div class="balance-fill-s" id="fillS" style="width:50%"></div>
-    </div>
-    <div class="balance-figures">
-      <span class="p mono" id="figP">US$0,00</span>
-      <span class="s mono" id="figS">US$0,00</span>
-    </div>
-  </div>
-</div>
-
-<main>
-
-  <div class="error-banner" id="errorBanner">
-    <strong>Esses parâmetros não permitem satisfazer simultaneamente as condições definidas.</strong>
-    <ul id="errorList"></ul>
-  </div>
-
-  <h3>1 · Parâmetros <span class="n">editáveis</span></h3>
-  <div class="grid">
-
-    <div class="panel">
-      <h2><span class="dot p"></span>Conta Principal</h2>
-      <label for="pCapital">Capital inicial (US$)</label>
-      <input type="number" id="pCapital" value="1000" step="1">
-
-      <label for="pObjetivo">Objetivo de lucro (US$)</label>
-      <input type="number" id="pObjetivo" value="2500" step="1">
-
-      <label for="pPerdaMax">Perda máxima permitida (US$)</label>
-      <input type="number" id="pPerdaMax" value="1000" step="1">
-
-      <label for="interval">Intervalo dos cenários (US$)</label>
-      <input type="number" id="interval" value="250" step="1">
-    </div>
-
-    <div class="panel">
-      <h2><span class="dot s"></span>Conta Secundária</h2>
-      <label for="sCapital">Capital inicial (US$)</label>
-      <input type="number" id="sCapital" value="70" step="1">
-
-      <label for="sObjetivo">Objetivo de lucro desejado (US$)</label>
-      <input type="number" id="sObjetivo" value="70" step="1">
-
-      <label for="sPerdaMax">Perda máxima desejada (US$)</label>
-      <input type="number" id="sPerdaMax" value="70" step="1">
-    </div>
-
-    <div class="panel">
-      <h2><span class="dot f"></span>Valor Fixo Adicional</h2>
-      <div class="toggle-row">
-        <label style="margin:0;">Ativar valor fixo</label>
-        <div class="switch" id="fixedToggle" role="switch" aria-checked="false" tabindex="0"></div>
-      </div>
-      <div class="fixed-fields hidden" id="fixedFields">
-        <label for="fixedValue">Valor fixo (US$)</label>
-        <input type="number" id="fixedValue" value="17" step="1">
-
-        <div class="radio-group">
-          <label class="radio-opt">
-            <input type="radio" name="fixedMode" value="A" checked>
-            <span><b>A — Recuperado quando a principal perde.</b> O valor fixo é somado ao saldo da secundária apenas do lado em que a principal está perdendo (e a secundária ganhando), de forma proporcional: no ponto de perda máxima da principal, o valor fixo é recuperado por completo. Não se aplica quando a principal está ganhando.</span>
-          </label>
-          <label class="radio-opt">
-            <input type="radio" name="fixedMode" value="B">
-            <span><b>B — Reserva separada.</b> O valor fixo fica fora da curva: exibido como um valor à parte, sem alterar o saldo calculado.</span>
-          </label>
+    <div class="container">
+        <div class="header">
+            <h1>💱 Forex Manager</h1>
+            <p>Gerencie suas contas com precisão</p>
         </div>
-      </div>
+        
+        <div class="total-balance">
+            <div class="total-label">Saldo Total</div>
+            <div class="total-value" id="totalBalance">$0.00</div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('accounts')">Contas</button>
+            <button class="tab" onclick="switchTab('config')">Configurações</button>
+        </div>
+        
+        <div id="accountsTab">
+            <div class="accounts-grid" id="accountsGrid"></div>
+        </div>
+        
+        <div id="configTab" style="display: none;">
+            <div class="settings-section">
+                <div class="settings-title">ℹ️ Instalar como app</div>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 1rem;">
+                    Agora pode instalar direto! O navegador deve oferecer a opção de instalar no seu próximo clique no menu (⋮).
+                </p>
+            </div>
 
-      <label for="opCount" style="margin-top:16px;">Operações RR 1:1</label>
-      <select id="opCount">
-        <option value="1">1 operação</option>
-        <option value="2">2 operações</option>
-        <option value="3" selected>3 operações</option>
-        <option value="4">4 operações</option>
-        <option value="5">5 operações</option>
-        <option value="custom">Número personalizado</option>
-      </select>
-      <div class="op-count-custom hidden" id="opCountCustomWrap">
-        <input type="number" id="opCountCustom" value="6" min="1" step="1">
-      </div>
+            <div class="settings-section">
+                <div class="settings-title">Gerenciar dados</div>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 1rem;">
+                    Cuidado! Ao resetar, todos os dados serão apagados permanentemente.
+                </p>
+                <button class="button btn-danger" style="width: 100%;" onclick="confirmReset()">Resetar tudo</button>
+            </div>
+            
+            <div class="settings-section">
+                <div class="settings-title">Sobre</div>
+                <p style="font-size: 13px; color: var(--text-secondary);">
+                    Forex Account Manager v1.0<br><br>
+                    ✅ Dados guardados localmente no seu telefone<br>
+                    ✅ Funciona completamente offline<br>
+                    ✅ Sem servidores, totalmente seguro<br><br>
+                    Desenvolvido com ❤️ para traders
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para adicionar transação -->
+    <div class="modal" id="transactionModal">
+        <div class="modal-content">
+            <div class="modal-header">Adicionar resultado</div>
+            <form onsubmit="saveTransaction(event)">
+                <div class="form-group">
+                    <label class="form-label">Tipo de transação</label>
+                    <select class="form-input" id="transactionType">
+                        <option value="gain">Ganho ✅</option>
+                        <option value="loss">Perda ❌</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Valor ($)</label>
+                    <input type="number" class="form-input" id="transactionAmount" placeholder="100.00" step="0.01" inputmode="decimal" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descrição (opcional)</label>
+                    <input type="text" class="form-input" id="transactionDescription" placeholder="Ex: Trade EURUSD">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="button btn-secondary" onclick="closeTransaction()">Cancelar</button>
+                    <button type="submit" class="button btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal para saldo inicial -->
+    <div class="modal" id="initialBalanceModal">
+        <div class="modal-content">
+            <div class="modal-header">Configurar saldo inicial</div>
+            <form onsubmit="saveInitialBalance(event)">
+                <div class="form-group">
+                    <label class="form-label">Saldo inicial ($)</label>
+                    <input type="number" class="form-input" id="initialBalance" placeholder="1000.00" step="0.01" inputmode="decimal" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="button btn-primary" style="flex: 1;">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal para ver histórico -->
+    <div class="modal" id="historyModal">
+        <div class="modal-content">
+            <div class="modal-header" id="historyTitle">Histórico</div>
+            <div id="transactionsList" class="transactions-list"></div>
+            <div class="form-actions" style="margin-top: 1rem;">
+                <button class="button btn-secondary" style="flex: 1;" onclick="closeHistory()">Fechar</button>
+            </div>
+        </div>
     </div>
 
-  </div>
-
-  <h3>2 · Pontos fundamentais</h3>
-  <div class="keypoints" id="keypoints"></div>
-
-  <h3>3 · Curva Principal × Secundária <span class="n">gráfico</span></h3>
-  <div class="chart-panel">
-    <canvas id="curveChart" height="110"></canvas>
-  </div>
-
-  <h3>4 · Tabela de cenários</h3>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Saldo Principal</th>
-          <th>Resultado Principal</th>
-          <th>Saldo Secundária</th>
-          <th>Mudança Secundária</th>
-          <th>Direção</th>
-          <th>Risco 1:1 /op</th>
-          <th>Alvo 1:1 /op</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
-
-  <h3>5 · Calculadora de "qualquer momento"</h3>
-  <div class="current-panel">
-    <div class="current-input">
-      <label for="currentP">Saldo atual da principal (US$)</label>
-      <input type="number" id="currentP" value="1850" step="1">
-    </div>
-    <div class="current-input" style="margin-top:14px;">
-      <label for="currentSReal">Saldo atual real da secundária (US$) — opcional</label>
-      <input type="number" id="currentSReal" step="1" placeholder="Deixa em branco para usar o valor teórico da curva">
-      <p style="font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.4;">Preenche quando a secundária não acompanhou perfeitamente a principal na conta real (ex.: stops/takes incorretos). O desvio e a entrada sugerida passam a ser recalculados a partir deste saldo real.</p>
-    </div>
-    <div class="current-results" id="currentResults"></div>
-  </div>
-
-</main>
-
-<footer>
-  Saldo = dinheiro existente na conta · Resultado = lucro ou prejuízo em relação ao capital inicial. Aplicação 100% local, sem backend.
-  Os dados inseridos ficam guardados automaticamente neste navegador. <a href="#" id="clearStateBtn" style="text-decoration:underline;">Limpar dados guardados</a>
-</footer>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script>
-(function(){
-  const $ = (id) => document.getElementById(id);
-  const fmt = (n) => {
-    const sign = n < 0 ? '-' : '';
-    return sign + 'US$' + Math.abs(n).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
-  };
-  const fmtSigned = (n) => (n > 0 ? '+' : '') + fmt(n);
-
-  let chart = null;
-
-  // ---- persistence (localStorage) ----
-  const STORAGE_KEY = 'espelho_state_v1';
-  const PERSISTED_IDS = ['pCapital','pObjetivo','pPerdaMax','interval','sCapital','sObjetivo','sPerdaMax','fixedValue','opCount','opCountCustom','currentP','currentSReal'];
-  function saveState(){
-    try{
-      const state = {};
-      PERSISTED_IDS.forEach(id => { state[id] = $(id).value; });
-      state.fixedEnabled = fixedEnabled;
-      state.fixedMode = getFixedMode();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }catch(e){ /* localStorage indisponível — ignora silenciosamente */ }
-  }
-  function loadState(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return;
-      const state = JSON.parse(raw);
-      PERSISTED_IDS.forEach(id => {
-        if(state[id] !== undefined && state[id] !== '') $(id).value = state[id];
-      });
-      if(state.fixedMode){
-        const radio = document.querySelector(`input[name="fixedMode"][value="${state.fixedMode}"]`);
-        if(radio) radio.checked = true;
-      }
-      opCountCustomWrapSync();
-      if(state.fixedEnabled) setFixedEnabled(true);
-    }catch(e){ /* dados guardados corrompidos ou indisponíveis — ignora */ }
-  }
-  function opCountCustomWrapSync(){
-    $('opCountCustomWrap').classList.toggle('hidden', $('opCount').value !== 'custom');
-  }
-  function clearState(){
-    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
-  }
-
-  // ---- fixed value toggle ----
-  const fixedToggle = $('fixedToggle');
-  const fixedFields = $('fixedFields');
-  let fixedEnabled = false;
-  function setFixedEnabled(v){
-    fixedEnabled = v;
-    fixedToggle.classList.toggle('on', v);
-    fixedToggle.setAttribute('aria-checked', String(v));
-    fixedFields.classList.toggle('hidden', !v);
-    recalc();
-  }
-  fixedToggle.addEventListener('click', () => setFixedEnabled(!fixedEnabled));
-  fixedToggle.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); setFixedEnabled(!fixedEnabled); }
-  });
-
-  // ---- op count custom ----
-  const opCount = $('opCount');
-  const opCountCustomWrap = $('opCountCustomWrap');
-  opCount.addEventListener('change', () => {
-    opCountCustomWrap.classList.toggle('hidden', opCount.value !== 'custom');
-    recalc();
-  });
-
-  function getOpCount(){
-    if(opCount.value === 'custom'){
-      const v = parseInt($('opCountCustom').value, 10);
-      return (v && v > 0) ? v : 1;
-    }
-    return parseInt(opCount.value, 10);
-  }
-
-  function getFixedMode(){
-    return document.querySelector('input[name="fixedMode"]:checked').value;
-  }
-
-  // ---- core model ----
-  function readParams(){
-    return {
-      pCapital: parseFloat($('pCapital').value),
-      pObjetivo: parseFloat($('pObjetivo').value),
-      pPerdaMax: parseFloat($('pPerdaMax').value),
-      interval: parseFloat($('interval').value),
-      sCapital: parseFloat($('sCapital').value),
-      sObjetivo: parseFloat($('sObjetivo').value),
-      sPerdaMax: parseFloat($('sPerdaMax').value),
-      fixedValue: parseFloat($('fixedValue').value) || 0,
-    };
-  }
-
-  function validate(p){
-    const errs = [];
-    if(!(p.pCapital > 0)) errs.push('O capital inicial da principal deve ser maior que zero.');
-    if(!(p.pObjetivo > 0)) errs.push('O objetivo de lucro da principal deve ser maior que zero.');
-    if(!(p.pPerdaMax > 0)) errs.push('A perda máxima da principal deve ser maior que zero.');
-    if(!(p.interval > 0)) errs.push('O intervalo dos cenários deve ser maior que zero.');
-    if(!(p.sCapital > 0)) errs.push('O capital inicial da secundária deve ser maior que zero.');
-    if(!(p.sObjetivo > 0)) errs.push('O objetivo de lucro da secundária deve ser maior que zero.');
-    if(!(p.sPerdaMax > 0)) errs.push('A perda máxima da secundária deve ser maior que zero.');
-    if(p.pPerdaMax > 0 && p.pCapital > 0 && p.pPerdaMax > p.pCapital){
-      errs.push('A perda máxima da principal não pode exceder o capital inicial da principal (a conta ficaria negativa).');
-    }
-    if(p.sPerdaMax > 0 && p.sCapital > 0 && p.sPerdaMax > p.sCapital){
-      errs.push('A perda máxima da secundária não pode exceder o capital inicial da secundária (o saldo ficaria negativo).');
-    }
-    if(fixedEnabled){
-      if(isNaN(p.fixedValue)) errs.push('O valor fixo adicional precisa ser um número (pode ser 0).');
-    }
-    return errs;
-  }
-
-  // secondary balance from the curve only (no fixed value applied)
-  function curveS(P, p){
-    let s;
-    if(P <= p.pCapital){
-      s = p.sCapital + (p.sObjetivo / p.pPerdaMax) * (p.pCapital - P);
-    } else {
-      s = p.sCapital - (p.sPerdaMax / p.pObjetivo) * (P - p.pCapital);
-    }
-    return Math.max(0, s);
-  }
-
-  // final secondary balance, applying fixed value per selected mode.
-  // Mode A: the fixed value is recovered only on the loss side (principal losing,
-  // secondary gaining) — it scales in proportionally along that segment and is
-  // fully recovered exactly at the principal's max-loss point. It does not apply
-  // when the principal is gaining (secondary losing side).
-  function finalS(P, p){
-    const curve = curveS(P, p);
-    if(fixedEnabled && getFixedMode() === 'A' && P <= p.pCapital){
-      const recovered = (p.fixedValue / p.pPerdaMax) * (p.pCapital - P);
-      return Math.max(0, curve + recovered);
-    }
-    return curve;
-  }
-
-  function computeRow(P, p, opN){
-    // VALIDAÇÃO CRÍTICA
-    if(opN < 1){
-      console.warn('Aviso: opN deve ser >= 1. Usando opN = 1.');
-      opN = 1;
-    }
-
-    // SALDOS E MUDANÇAS
-    const curve = curveS(P, p);
-    const final = finalS(P, p);
-    const resultadoP = P - p.pCapital;           // ganho/perda da principal
-    const mudancaS = final - p.sCapital;         // ganho/perda da secundária (delta apenas)
-    
-    // MÉDIA POR OPERAÇÃO
-    const resultadoPorOp = resultadoP / opN;
-    const mudancaPorOp = mudancaS / opN;
-    
-    // DIREÇÃO CLARA
-    let direcao = 'Neutro';
-    if(mudancaS > 0.005) direcao = 'Ganho';
-    else if(mudancaS < -0.005) direcao = 'Perda';
-    
-    // ========== RISCO vs ALVO (AGORA DIFERENTES!) ==========
-    // Risco: é o que perde ESPERADO por operação
-    // Alvo: é o ganho ESPERADO por operação (configurável via RR)
-    
-    const risco = Math.abs(mudancaPorOp);  // perda esperada por operação
-    const rrRatio = 1;  // RR 1:1 (pode ser feito configurável depois)
-    const alvo = risco * rrRatio;           // ganho esperado = risco × RR
-    
-    return {
-      P, 
-      curve, 
-      final, 
-      resultadoP, 
-      mudancaS,            // AGORA é apenas delta, não saldo completo
-      direcao, 
-      risco: Math.round(risco * 100) / 100,
-      alvo: Math.round(alvo * 100) / 100
-    };
-  }
-
-  function recalc(){
-    const p = readParams();
-    const errs = validate(p);
-    const banner = $('errorBanner');
-    const list = $('errorList');
-    list.innerHTML = errs.map(e => `<li>${e}</li>`).join('');
-    banner.classList.toggle('show', errs.length > 0);
-    if(errs.length > 0){
-      $('keypoints').innerHTML = '';
-      $('tableBody').innerHTML = '';
-      $('currentResults').innerHTML = '';
-      if(chart){ chart.destroy(); chart = null; }
-      return;
-    }
-
-    const opN = getOpCount();
-    const rangeEnd = p.pCapital + p.pObjetivo;
-    const rangeStart = 0;
-
-    // key points
-    const kp0 = computeRow(0, p, opN);
-    const kpInit = computeRow(p.pCapital, p, opN);
-    const kpObj = computeRow(rangeEnd, p, opN);
-
-    $('keypoints').innerHTML = `
-      <div class="kp">
-        <div class="kp-label">Perda máxima da principal</div>
-        <div class="kp-main neg">${fmtSigned(-p.pPerdaMax)} <span style="color:var(--muted);font-size:13px;">resultado</span></div>
-        <div class="kp-sub">Saldo principal: <b class="mono">${fmt(0)}</b> · Saldo secundária: <b class="mono" style="color:var(--secundaria)">${fmt(kp0.final)}</b> (${fmtSigned(kp0.mudancaS)})</div>
-      </div>
-      <div class="kp">
-        <div class="kp-label">Capital inicial</div>
-        <div class="kp-main">${fmtSigned(0)} <span style="color:var(--muted);font-size:13px;">resultado</span></div>
-        <div class="kp-sub">Saldo principal: <b class="mono">${fmt(p.pCapital)}</b> · Saldo secundária: <b class="mono" style="color:var(--secundaria)">${fmt(kpInit.final)}</b> (ponto de partida)</div>
-      </div>
-      <div class="kp">
-        <div class="kp-label">Objetivo da principal</div>
-        <div class="kp-main pos">${fmtSigned(p.pObjetivo)} <span style="color:var(--muted);font-size:13px;">resultado</span></div>
-        <div class="kp-sub">Saldo principal: <b class="mono">${fmt(rangeEnd)}</b> · Saldo secundária: <b class="mono" style="color:var(--secundaria)">${fmt(kpObj.final)}</b> (${fmtSigned(kpObj.mudancaS)})</div>
-      </div>
-    `;
-
-    // table rows at fixed interval, always including the 3 milestones
-    const rows = [];
-    const milestoneSet = new Set([0, p.pCapital, rangeEnd]);
-    for(let v = rangeStart; v <= rangeEnd + 1e-9; v += p.interval){
-      rows.push(Math.round(v * 100) / 100);
-    }
-    if(rows[rows.length-1] < rangeEnd - 1e-6) rows.push(Math.round(rangeEnd*100)/100);
-    milestoneSet.forEach(m => { if(!rows.some(r => Math.abs(r-m) < 1e-6)) rows.push(m); });
-    rows.sort((a,b) => a-b);
-
-    $('tableBody').innerHTML = rows.map(P => {
-      const r = computeRow(P, p, opN);
-      const isMilestone = Math.abs(P-0)<1e-6 || Math.abs(P-p.pCapital)<1e-6 || Math.abs(P-rangeEnd)<1e-6;
-      const dirClass = r.direcao === 'Ganho' ? 'pos' : (r.direcao === 'Perda' ? 'neg' : 'neu');
-      return `<tr class="${isMilestone ? 'milestone' : ''}">
-        <td class="mono">${fmt(r.P)}</td>
-        <td class="mono ${r.resultadoP>=0?'pos':'neg'}">${fmtSigned(r.resultadoP)}</td>
-        <td class="mono">${fmt(r.final)}</td>
-        <td class="mono ${dirClass}">${fmtSigned(r.mudancaS)}</td>
-        <td class="${dirClass}">${r.direcao}</td>
-        <td class="mono">${fmt(r.risco)}</td>
-        <td class="mono">${fmt(r.alvo)}</td>
-      </tr>`;
-    }).join('');
-
-    // chart
-    const chartLabels = rows.map(r => fmt(r));
-    const chartData = rows.map(P => finalS(P, p));
-    const ctx = $('curveChart').getContext('2d');
-    if(chart) chart.destroy();
-    chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: chartLabels,
-        datasets: [{
-          label: 'Saldo Secundária',
-          data: chartData,
-          borderColor: '#f5a623',
-          backgroundColor: 'rgba(245,166,35,0.08)',
-          fill: true,
-          tension: 0.15,
-          pointRadius: rows.map(P => (Math.abs(P-0)<1e-6||Math.abs(P-p.pCapital)<1e-6||Math.abs(P-rangeEnd)<1e-6) ? 5 : 0),
-          pointBackgroundColor: '#f5a623',
-          pointBorderColor: '#0a0d12',
-          pointBorderWidth: 2,
-          borderWidth: 2,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              title: (items) => 'Principal: ' + items[0].label,
-              label: (item) => 'Secundária: ' + fmt(item.raw)
+    <script>
+        let currentAccount = null;
+        
+        const defaultData = {
+            accounts: {
+                account1: {
+                    name: 'Conta 1',
+                    initialBalance: 0,
+                    currentBalance: 0,
+                    transactions: []
+                },
+                account2: {
+                    name: 'Conta 2',
+                    initialBalance: 0,
+                    currentBalance: 0,
+                    transactions: []
+                }
             }
-          }
-        },
-        scales: {
-          x: {
-            title: { display: true, text: 'Saldo da Conta Principal (US$)', color: '#8b93a7' },
-            ticks: { color: '#8b93a7', maxRotation: 0, autoSkip: true },
-            grid: { color: '#232a38' }
-          },
-          y: {
-            title: { display: true, text: 'Saldo da Conta Secundária (US$)', color: '#8b93a7' },
-            ticks: { color: '#8b93a7' },
-            grid: { color: '#232a38' },
-            beginAtZero: true
-          }
+        };
+        
+        function loadData() {
+            const stored = localStorage.getItem('forexData');
+            return stored ? JSON.parse(stored) : defaultData;
         }
-      }
-    });
-
-    renderCurrent(p, opN, rangeEnd);
-    renderBalanceBar(p, opN);
-    saveState();
-  }
-
-  function renderCurrent(p, opN, rangeEnd){
-    const Praw = parseFloat($('currentP').value);
-    const container = $('currentResults');
-    if(isNaN(Praw)){
-      container.innerHTML = '<div class="cr"><div class="cr-label">Informe um saldo válido</div></div>';
-      return;
-    }
-    const P = Math.max(0, Praw);
-    const r = computeRow(P, p, opN);
-    const sMaxPossible = finalS(0, p);
-
-    // suggested risk/target: secondary movement across one interval step from current point
-    const stepTarget = finalS(Math.min(rangeEnd, P + p.interval), p);
-
-    // optional: real (actual) secondary balance, entered manually when the real
-    // account has drifted from the theoretical curve (e.g. wrong stops/takes)
-    const SrealRaw = $('currentSReal').value;
-    const hasReal = SrealRaw.trim() !== '' && !isNaN(parseFloat(SrealRaw));
-    const Sreal = hasReal ? Math.max(0, parseFloat(SrealRaw)) : null;
-
-    if(hasReal){
-      const desvio = Sreal - r.final;
-      const desvioClass = desvio > 0.005 ? 'pos' : (desvio < -0.005 ? 'neg' : 'neu');
-      // CORRIGIDO: podePerder é quanto perdeu VS ganhou, não o saldo completo!
-      const mudancaReal = Sreal - p.sCapital;  // ganho/perda real
-      const podePerderReal = mudancaReal > 0 ? mudancaReal : 0;  // pode perder ganhos
-      const podeGanharReal = Math.max(0, sMaxPossible - Sreal);  // até máximo teórico
-      // recalibrated entry: distância do saldo REAL até onde deveria estar
-      const suggestedReal = Math.abs(mudancaReal / Math.max(1,opN)) || r.alvo;
-
-      container.innerHTML = `
-        <div class="cr"><div class="cr-label">Resultado da principal</div><div class="cr-val ${r.resultadoP>=0?'pos':'neg'}">${fmtSigned(r.resultadoP)}</div></div>
-        <div class="cr"><div class="cr-label">Saldo teórico — secundária (curva)</div><div class="cr-val" style="color:var(--secundaria)">${fmt(r.final)}</div></div>
-        <div class="cr"><div class="cr-label">Saldo real informado — secundária</div><div class="cr-val" style="color:var(--secundaria)">${fmt(Sreal)}</div></div>
-        <div class="cr"><div class="cr-label">Desvio (real − teórico)</div><div class="cr-val ${desvioClass}">${fmtSigned(desvio)}</div></div>
-        <div class="cr"><div class="cr-label">Secundária ainda pode perder (real)</div><div class="cr-val neg">${fmt(podePerderReal)}</div></div>
-        <div class="cr"><div class="cr-label">Secundária ainda pode ganhar (real)</div><div class="cr-val pos">${fmt(podeGanharReal)}</div></div>
-        <div class="cr"><div class="cr-label">Entrada recalibrada (RR 1:1)</div><div class="cr-val">${fmt(suggestedReal)}</div></div>
-        <div class="cr"><div class="cr-label">RR</div><div class="cr-val">1 : 1</div></div>
-      `;
-      return;
-    }
-
-    // CORRIGIDO: podePerder deve ser baseado na mudança (delta), não no saldo final!
-    const podePerder = r.mudancaS > 0 ? r.mudancaS : 0;  // se ganhou, pode perder tudo ganho
-    const podeGanhar = Math.max(0, sMaxPossible - r.final);  // até o máximo teórico
-    const suggested = Math.abs(r.mudancaS / Math.max(1, opN)) || (r.alvo);  // próxima operação esperada
-    const dirClass = r.direcao === 'Ganho' ? 'pos' : (r.direcao === 'Perda' ? 'neg' : 'neu');
-
-    container.innerHTML = `
-      <div class="cr"><div class="cr-label">Resultado da principal</div><div class="cr-val ${r.resultadoP>=0?'pos':'neg'}">${fmtSigned(r.resultadoP)}</div></div>
-      <div class="cr"><div class="cr-label">Saldo correspondente — secundária</div><div class="cr-val" style="color:var(--secundaria)">${fmt(r.final)}</div></div>
-      <div class="cr"><div class="cr-label">Ganho/perda da secundária desde o início</div><div class="cr-val ${dirClass}">${fmtSigned(r.mudancaS)}</div></div>
-      <div class="cr"><div class="cr-label">Secundária ainda pode perder (do ganho)</div><div class="cr-val neg">${fmt(podePerder)}</div></div>
-      <div class="cr"><div class="cr-label">Secundária ainda pode ganhar (até máx)</div><div class="cr-val pos">${fmt(podeGanhar)}</div></div>
-      <div class="cr"><div class="cr-label">Risco sugerido (RR 1:1)</div><div class="cr-val">${fmt(r.risco)}</div></div>
-      <div class="cr"><div class="cr-label">Alvo sugerido (RR 1:1)</div><div class="cr-val">${fmt(r.alvo)}</div></div>
-      <div class="cr"><div class="cr-label">RR</div><div class="cr-val">1 : 1</div></div>
-    `;
-  }
-
-  function renderBalanceBar(p, opN){
-    const Praw = parseFloat($('currentP').value);
-    const P = isNaN(Praw) ? p.pCapital : Math.max(0, Praw);
-    const r = computeRow(P, p, opN);
-
-    const SrealRaw = $('currentSReal').value;
-    const hasReal = SrealRaw.trim() !== '' && !isNaN(parseFloat(SrealRaw));
-    const mudancaSDisplay = hasReal ? (Math.max(0, parseFloat(SrealRaw)) - p.sCapital) : r.mudancaS;
-
-    // CORRIGIDO: Percentual CORRETO baseado em objetivo (0% a 100%)
-    // Para Principal: quanto alcançou do objetivo (0% a 100%)
-    const pctP = Math.min(100, Math.max(0, (Math.abs(r.resultadoP) / p.pObjetivo) * 100));
-    
-    // Para Secundária: quanto alcançou do objetivo (0% a 100%)
-    const pctS = Math.min(100, Math.max(0, (Math.abs(mudancaSDisplay) / p.sObjetivo) * 100));
-    
-    $('fillP').style.width = pctP + '%';
-    $('fillP').style.background = r.resultadoP >= 0
-      ? 'linear-gradient(90deg,var(--principal-dim),var(--principal))'
-      : 'linear-gradient(90deg,var(--principal-dim),var(--neg))';
-    $('fillS').style.width = pctS + '%';
-    $('figP').textContent = fmtSigned(r.resultadoP) + ' (principal)';
-    $('figS').textContent = fmtSigned(mudancaSDisplay) + (hasReal ? ' (secundária real)' : ' (secundária)');
-  }
-
-  // wire up all inputs (debounced on 'input' to avoid recalculating on every
-  // keystroke; 'change' stays immediate for select/blur events)
-  function debounce(fn, ms){
-    let t;
-    return function(...args){
-      clearTimeout(t);
-      t = setTimeout(() => fn.apply(this, args), ms);
-    };
-  }
-  const debouncedRecalc = debounce(recalc, 200);
-  document.querySelectorAll('input, select').forEach(el => {
-    el.addEventListener('input', debouncedRecalc);
-    el.addEventListener('change', recalc);
-  });
-
-  const clearBtn = document.getElementById('clearStateBtn');
-  if(clearBtn){
-    clearBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      if(confirm('Limpar todos os dados guardados neste navegador e repor os valores predefinidos?')){
-        clearState();
-        location.reload();
-      }
-    });
-  }
-
-  loadState();
-  recalc();
-})();
-</script>
+        
+        function saveData(data) {
+            localStorage.setItem('forexData', JSON.stringify(data));
+            render();
+        }
+        
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('accountsTab').style.display = 'none';
+            document.getElementById('configTab').style.display = 'none';
+            
+            if (tab === 'accounts') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('accountsTab').style.display = 'block';
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('configTab').style.display = 'block';
+            }
+        }
+        
+        function selectAccount(accountId) {
+            const data = loadData();
+            if (data.accounts[accountId].initialBalance === 0) {
+                currentAccount = accountId;
+                document.getElementById('initialBalanceModal').classList.add('active');
+                setTimeout(() => {
+                    document.getElementById('initialBalance').focus();
+                }, 100);
+            } else {
+                currentAccount = accountId;
+                render();
+            }
+        }
+        
+        function saveInitialBalance(event) {
+            event.preventDefault();
+            const data = loadData();
+            const amount = parseFloat(document.getElementById('initialBalance').value);
+            
+            data.accounts[currentAccount].initialBalance = amount;
+            data.accounts[currentAccount].currentBalance = amount;
+            data.accounts[currentAccount].transactions = [];
+            
+            saveData(data);
+            document.getElementById('initialBalanceModal').classList.remove('active');
+            document.getElementById('initialBalance').value = '';
+        }
+        
+        function openTransaction() {
+            if (!currentAccount) {
+                alert('Selecione uma conta primeiro');
+                return;
+            }
+            document.getElementById('transactionModal').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('transactionAmount').focus();
+            }, 100);
+        }
+        
+        function closeTransaction() {
+            document.getElementById('transactionModal').classList.remove('active');
+            document.getElementById('transactionAmount').value = '';
+            document.getElementById('transactionDescription').value = '';
+            document.getElementById('transactionType').value = 'gain';
+        }
+        
+        function saveTransaction(event) {
+            event.preventDefault();
+            const data = loadData();
+            const amount = parseFloat(document.getElementById('transactionAmount').value);
+            const type = document.getElementById('transactionType').value;
+            const description = document.getElementById('transactionDescription').value;
+            
+            const transaction = {
+                id: Date.now(),
+                type,
+                amount,
+                description: description || (type === 'gain' ? 'Ganho' : 'Perda'),
+                date: new Date().toLocaleString('pt-BR')
+            };
+            
+            data.accounts[currentAccount].transactions.push(transaction);
+            
+            if (type === 'gain') {
+                data.accounts[currentAccount].currentBalance += amount;
+            } else {
+                data.accounts[currentAccount].currentBalance -= amount;
+            }
+            
+            saveData(data);
+            closeTransaction();
+        }
+        
+        function openHistory() {
+            if (!currentAccount) return;
+            
+            const data = loadData();
+            const account = data.accounts[currentAccount];
+            const list = document.getElementById('transactionsList');
+            
+            document.getElementById('historyTitle').textContent = `Histórico - ${account.name}`;
+            
+            if (account.transactions.length === 0) {
+                list.innerHTML = '<div class="transactions-empty">Nenhuma transação registrada</div>';
+            } else {
+                list.innerHTML = account.transactions.reverse().map(t => `
+                    <div class="transaction-item">
+                        <div class="transaction-info">
+                            <div class="transaction-type">${t.description}</div>
+                            <div class="transaction-date">${t.date}</div>
+                        </div>
+                        <div class="transaction-amount ${t.type === 'gain' ? 'balance-positive' : 'balance-negative'}">
+                            ${t.type === 'gain' ? '+' : '-'}$${t.amount.toFixed(2)}
+                        </div>
+                    </div>
+                `).join('');
+                account.transactions.reverse();
+            }
+            
+            document.getElementById('historyModal').classList.add('active');
+        }
+        
+        function closeHistory() {
+            document.getElementById('historyModal').classList.remove('active');
+        }
+        
+        function confirmReset() {
+            if (confirm('ATENÇÃO! Isso vai apagar TODOS os dados. Tem certeza?')) {
+                if (confirm('Tem mesmo certeza? Não tem volta!')) {
+                    localStorage.removeItem('forexData');
+                    currentAccount = null;
+                    render();
+                    alert('Dados resetados com sucesso!');
+                }
+            }
+        }
+        
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:application/javascript,' + 
+                encodeURIComponent(`self.addEventListener('install', () => self.skipWaiting());
+                                   self.addEventListener('activate', () => self.clients.claim());`)
+            ).catch(() => {});
+        }
+        
+        function render() {
+            const data = loadData();
+            const grid = document.getElementById('accountsGrid');
+            
+            let totalBalance = 0;
+            Object.entries(data.accounts).forEach(([id, account]) => {
+                totalBalance += account.currentBalance;
+            });
+            
+            document.getElementById('totalBalance').textContent = `$${totalBalance.toFixed(2)}`;
+            
+            grid.innerHTML = Object.entries(data.accounts).map(([id, account]) => {
+                const profit = account.currentBalance - account.initialBalance;
+                const profitPercent = account.initialBalance > 0 
+                    ? ((profit / account.initialBalance) * 100).toFixed(2)
+                    : 0;
+                
+                return `
+                    <div class="account-card ${currentAccount === id ? 'active' : ''}" onclick="selectAccount('${id}')">
+                        <div class="account-header">
+                            <div class="account-name">${account.name}</div>
+                            ${account.initialBalance > 0 ? `<div class="account-badge">Ativa</div>` : ''}
+                        </div>
+                        
+                        ${account.initialBalance > 0 ? `
+                            <div class="balance-display">
+                                <div class="balance-label">Saldo atual</div>
+                                <div class="balance-value ${account.currentBalance >= account.initialBalance ? 'balance-positive' : 'balance-negative'}">
+                                    $${account.currentBalance.toFixed(2)}
+                                </div>
+                            </div>
+                            
+                            <div class="stats-row">
+                                <div class="stat">
+                                    <div class="stat-label">Inicial</div>
+                                    <div class="stat-value">$${account.initialBalance.toFixed(2)}</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-label">Lucro/Perda</div>
+                                    <div class="stat-value ${profit >= 0 ? 'balance-positive' : 'balance-negative'}">
+                                        ${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="stats-row">
+                                <div class="stat">
+                                    <div class="stat-label">%</div>
+                                    <div class="stat-value ${profit >= 0 ? 'balance-positive' : 'balance-negative'}">
+                                        ${profitPercent > 0 ? '+' : ''}${profitPercent}%
+                                    </div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-label">Operações</div>
+                                    <div class="stat-value">${account.transactions.length}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <button class="button btn-success btn-small" onclick="event.stopPropagation(); openTransaction()">+ Adicionar</button>
+                                <button class="button btn-secondary btn-small" onclick="event.stopPropagation(); openHistory()">📋 Histórico</button>
+                            </div>
+                        ` : `
+                            <div style="text-align: center; padding: 1.5rem 0; color: var(--text-secondary); font-size: 13px;">
+                                Clique para configurar
+                            </div>
+                        `}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        window.addEventListener('load', render);
+    </script>
 </body>
 </html>
