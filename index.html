@@ -6,10 +6,10 @@
     <meta name="theme-color" content="#1e40af">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Forex Manager">
-    <meta name="description" content="Gerencie suas contas Forex com precisão">
-    <link rel="manifest" href="data:application/json,{%22name%22:%22Forex Account Manager%22,%22short_name%22:%22Forex Manager%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%231e40af%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27%3E%3Crect fill=%27%231e40af%27 width=%27192%27 height=%27192%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 font-size=%27100%27 font-weight=%27bold%27 fill=%27white%27 text-anchor=%27middle%27 dominant-baseline=%27middle%27%3E💱%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22192x192%22,%22type%22:%22image/svg+xml%22}]}">
-    <title>Forex Account Manager</title>
+    <meta name="apple-mobile-web-app-title" content="TraderVault">
+    <meta name="description" content="Gerencie seus dias de trading com precisão">
+    <link rel="manifest" href="data:application/json,{%22name%22:%22TraderVault%22,%22short_name%22:%22TraderVault%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%231e40af%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27%3E%3Crect fill=%27%231e40af%27 width=%27192%27 height=%27192%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 font-size=%27100%27 font-weight=%27bold%27 fill=%27white%27 text-anchor=%27middle%27 dominant-baseline=%27middle%27%3E📈%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22192x192%22,%22type%22:%22image/svg+xml%22}]}">
+    <title>TraderVault - Dia a Dia</title>
     <style>
         * {
             margin: 0;
@@ -60,7 +60,7 @@
         }
         
         .container {
-            max-width: 420px;
+            max-width: 500px;
             margin: 0 auto;
             padding: 1rem;
             padding-bottom: 2rem;
@@ -68,7 +68,6 @@
         
         .header {
             margin-bottom: 2rem;
-            text-align: center;
             padding-top: env(safe-area-inset-top);
         }
         
@@ -83,64 +82,22 @@
             font-size: 14px;
         }
         
-        .accounts-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .account-card {
+        .overview {
             background: var(--surface-2);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.25rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            user-select: none;
-            -webkit-user-select: none;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
         }
         
-        .account-card:active {
-            transform: scale(0.98);
-        }
-        
-        .account-card.active {
-            border: 2px solid var(--primary);
-            background: linear-gradient(135deg, rgba(30, 64, 175, 0.05), transparent);
-        }
-        
-        .account-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .account-name {
-            font-weight: 600;
-            font-size: 15px;
-        }
-        
-        .account-badge {
-            background: var(--primary);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .balance-display {
-            background: var(--surface-1);
-            padding: 1rem;
-            border-radius: 8px;
+        .overview-item {
             text-align: center;
         }
         
-        .balance-label {
+        .overview-label {
             font-size: 12px;
             color: var(--text-secondary);
             text-transform: uppercase;
@@ -148,7 +105,7 @@
             margin-bottom: 0.5rem;
         }
         
-        .balance-value {
+        .overview-value {
             font-size: 24px;
             font-weight: 700;
         }
@@ -161,28 +118,122 @@
             color: var(--danger);
         }
         
-        .stats-row {
+        .trading-days-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .trading-day {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .trading-day-header {
+            background: linear-gradient(135deg, rgba(30, 64, 175, 0.1), transparent);
+            border-bottom: 2px solid var(--border);
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .trading-day-header:active {
+            background: linear-gradient(135deg, rgba(30, 64, 175, 0.15), transparent);
+        }
+        
+        .trading-day-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .trading-day-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 13px;
+        }
+        
+        .trading-day-stat {
+            font-weight: 600;
+        }
+        
+        .trading-day-content {
+            display: none;
+            padding: 1rem 1.25rem;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .trading-day.expanded .trading-day-content {
+            display: flex;
+        }
+        
+        .transaction-item {
+            background: var(--surface-1);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border);
+        }
+        
+        .transaction-info {
+            flex: 1;
+        }
+        
+        .transaction-desc {
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 0.25rem;
+        }
+        
+        .transaction-percent {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .transaction-amount {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.25rem;
+        }
+        
+        .transaction-value {
+            font-weight: 700;
+            font-size: 15px;
+        }
+        
+        .day-summary {
+            background: linear-gradient(135deg, rgba(30, 64, 175, 0.08), transparent);
+            border-top: 1px solid var(--border);
+            border-radius: 0 0 12px 12px;
+            padding: 1rem 1.25rem;
+            margin-top: 0.5rem;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
-            font-size: 12px;
+            gap: 1rem;
         }
         
-        .stat {
+        .day-summary-item {
             text-align: center;
-            padding: 0.75rem;
-            background: var(--surface-1);
-            border-radius: 6px;
+            font-size: 13px;
         }
         
-        .stat-label {
+        .day-summary-label {
             color: var(--text-secondary);
             margin-bottom: 0.25rem;
         }
         
-        .stat-value {
-            font-weight: 600;
-            font-size: 14px;
+        .day-summary-value {
+            font-weight: 700;
+            font-size: 16px;
         }
         
         .button {
@@ -205,26 +256,8 @@
         }
         
         .btn-primary:active {
+            transform: scale(0.95);
             background: var(--primary-dark);
-        }
-        
-        .btn-secondary {
-            background: var(--surface-1);
-            color: var(--text-primary);
-            border: 1px solid var(--border-strong);
-        }
-        
-        .btn-secondary:active {
-            background: var(--border);
-        }
-        
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-        
-        .btn-danger:active {
-            background: #b91c1c;
         }
         
         .btn-success {
@@ -233,12 +266,23 @@
         }
         
         .btn-success:active {
+            transform: scale(0.95);
             background: #15803d;
         }
         
         .btn-small {
             padding: 0.5rem 0.75rem;
             font-size: 12px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .action-buttons button {
+            flex: 1;
         }
         
         .modal {
@@ -250,9 +294,9 @@
             bottom: 0;
             background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
-            align-items: center;
+            align-items: flex-end;
             justify-content: center;
-            padding: 1rem;
+            padding-bottom: env(safe-area-inset-bottom);
         }
         
         .modal.active {
@@ -261,16 +305,23 @@
         
         .modal-content {
             background: var(--surface-2);
-            border-radius: 16px;
-            padding: 2rem;
-            max-width: 90%;
+            border-radius: 20px 20px 0 0;
+            padding: 2rem 1.5rem;
             width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+            max-width: 500px;
+            animation: slideUp 0.3s ease-out;
         }
         
-        .modal-header {
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-title {
             font-size: 20px;
             font-weight: 600;
             margin-bottom: 1.5rem;
@@ -282,9 +333,10 @@
         
         .form-label {
             display: block;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             margin-bottom: 0.5rem;
+            color: var(--text-primary);
         }
         
         .form-input {
@@ -292,116 +344,81 @@
             padding: 0.75rem;
             border: 1px solid var(--border);
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 15px;
+            font-family: inherit;
             background: var(--surface-1);
             color: var(--text-primary);
-            -webkit-appearance: none;
-            appearance: none;
         }
         
         .form-input:focus {
             outline: none;
             border-color: var(--primary);
-            background: var(--surface-2);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
         }
         
-        select.form-input {
-            cursor: pointer;
-        }
-        
-        .form-actions {
+        .form-buttons {
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
             margin-top: 2rem;
         }
         
-        .form-actions button {
+        .form-buttons button {
             flex: 1;
         }
         
-        .transaction-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-            font-size: 14px;
+        .btn-secondary {
+            background: var(--surface-1);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
         }
         
-        .transaction-item:last-child {
-            border-bottom: none;
+        .btn-secondary:active {
+            transform: scale(0.95);
+            background: var(--border);
         }
         
-        .transaction-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-        
-        .transaction-type {
-            font-weight: 500;
-        }
-        
-        .transaction-date {
-            font-size: 12px;
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
             color: var(--text-secondary);
         }
         
-        .transaction-amount {
-            font-weight: 600;
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 1rem;
         }
         
-        .transactions-list {
+        .config-section {
             background: var(--surface-2);
             border: 1px solid var(--border);
             border-radius: 12px;
-            margin-bottom: 2rem;
-            overflow: hidden;
-            max-height: 300px;
-            overflow-y: auto;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
         }
         
-        .transactions-empty {
-            padding: 2rem;
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 1rem;
-        }
-        
-        .action-buttons button {
-            flex: 1;
+        .config-section-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 15px;
         }
         
         .tabs {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
             border-bottom: 1px solid var(--border);
         }
         
         .tab {
-            padding: 0.75rem 1rem;
-            background: none;
+            padding: 1rem;
             border: none;
+            background: none;
+            cursor: pointer;
             font-size: 14px;
             font-weight: 500;
             color: var(--text-secondary);
-            cursor: pointer;
             border-bottom: 2px solid transparent;
-            margin-bottom: -1px;
             transition: all 0.2s;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-        
-        .tab:active {
-            opacity: 0.7;
         }
         
         .tab.active {
@@ -409,233 +426,197 @@
             border-bottom-color: var(--primary);
         }
         
-        .total-balance {
-            background: linear-gradient(135deg, var(--primary), #0ea5e9);
-            color: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            text-align: center;
+        .tab-content {
+            display: none;
         }
         
-        .total-label {
-            font-size: 13px;
-            opacity: 0.9;
-            margin-bottom: 0.5rem;
-        }
-        
-        .total-value {
-            font-size: 32px;
-            font-weight: 700;
-        }
-        
-        .settings-section {
-            background: var(--surface-2);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-        }
-        
-        .settings-title {
-            font-weight: 600;
-            margin-bottom: 1rem;
+        .tab-content.active {
+            display: block;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>💱 Forex Manager</h1>
-            <p>Gerencie suas contas com precisão</p>
-        </div>
-        
-        <div class="total-balance">
-            <div class="total-label">Saldo Total</div>
-            <div class="total-value" id="totalBalance">$0.00</div>
+            <h1>📈 TraderVault</h1>
+            <p>Acompanhe seu trading dia a dia</p>
         </div>
         
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('accounts')">Contas</button>
-            <button class="tab" onclick="switchTab('config')">Configurações</button>
+            <button class="tab active" onclick="switchTab('tradingTab')">Dias de Trading</button>
+            <button class="tab" onclick="switchTab('configTab')">Configuração</button>
         </div>
         
-        <div id="accountsTab">
-            <div class="accounts-grid" id="accountsGrid"></div>
-        </div>
-        
-        <div id="configTab" style="display: none;">
-            <div class="settings-section">
-                <div class="settings-title">ℹ️ Instalar como app</div>
-                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 1rem;">
-                    Agora pode instalar direto! O navegador deve oferecer a opção de instalar no seu próximo clique no menu (⋮).
-                </p>
-            </div>
-
-            <div class="settings-section">
-                <div class="settings-title">Gerenciar dados</div>
-                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 1rem;">
-                    Cuidado! Ao resetar, todos os dados serão apagados permanentemente.
-                </p>
-                <button class="button btn-danger" style="width: 100%;" onclick="confirmReset()">Resetar tudo</button>
+        <div id="tradingTab" class="tab-content active">
+            <div class="overview">
+                <div class="overview-item">
+                    <div class="overview-label">Saldo Inicial</div>
+                    <div class="overview-value" id="initialBalance">$0.00</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label">Saldo Atual</div>
+                    <div class="overview-value" id="currentBalance">$0.00</div>
+                </div>
             </div>
             
-            <div class="settings-section">
-                <div class="settings-title">Sobre</div>
-                <p style="font-size: 13px; color: var(--text-secondary);">
-                    Forex Account Manager v1.0<br><br>
-                    ✅ Dados guardados localmente no seu telefone<br>
-                    ✅ Funciona completamente offline<br>
-                    ✅ Sem servidores, totalmente seguro<br><br>
-                    Desenvolvido com ❤️ para traders
-                </p>
+            <div class="overview">
+                <div class="overview-item">
+                    <div class="overview-label">Resultado Total</div>
+                    <div class="overview-value" id="totalResult">$0.00</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label">% Total</div>
+                    <div class="overview-value" id="totalPercent">0.00%</div>
+                </div>
+            </div>
+            
+            <button class="button btn-success" onclick="openNewDay()" style="width: 100%; margin-bottom: 1.5rem;">+ Novo Dia de Trading</button>
+            
+            <div id="tradingDaysList" class="trading-days-list">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <p>Nenhum dia de trading registrado</p>
+                    <p style="font-size: 12px; margin-top: 0.5rem;">Clique em "Novo Dia de Trading" para começar</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="configTab" class="tab-content">
+            <div class="config-section">
+                <div class="config-section-title">Saldo Inicial</div>
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label">Valor da conta</label>
+                    <input type="number" id="configInitialBalance" class="form-input" placeholder="Ex: 1000.00" step="0.01" min="0">
+                </div>
+                <button class="button btn-primary" onclick="saveInitialBalance()" style="width: 100%;">Salvar Saldo Inicial</button>
+            </div>
+            
+            <div class="config-section">
+                <div class="config-section-title">Dados</div>
+                <button class="button btn-secondary" onclick="exportData()" style="width: 100%; margin-bottom: 0.5rem;">💾 Exportar dados</button>
+                <button class="button btn-secondary" onclick="confirmReset()" style="width: 100%; color: var(--danger);">🗑️ Limpar tudo</button>
             </div>
         </div>
     </div>
     
-    <!-- Modal para adicionar transação -->
-    <div class="modal" id="transactionModal">
+    <!-- Modal: Novo Dia de Trading -->
+    <div id="newDayModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">Adicionar resultado</div>
-            <form onsubmit="saveTransaction(event)">
+            <div class="modal-title">Novo Dia de Trading</div>
+            <form onsubmit="saveNewDay(event)">
                 <div class="form-group">
-                    <label class="form-label">Tipo de transação</label>
-                    <select class="form-input" id="transactionType">
-                        <option value="gain">Ganho ✅</option>
-                        <option value="loss">Perda ❌</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Valor ($)</label>
-                    <input type="number" class="form-input" id="transactionAmount" placeholder="100.00" step="0.01" inputmode="decimal" required>
+                    <label class="form-label">Número do dia</label>
+                    <input type="number" id="dayNumber" class="form-input" placeholder="Ex: 1" min="1" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Descrição (opcional)</label>
-                    <input type="text" class="form-input" id="transactionDescription" placeholder="Ex: Trade EURUSD">
+                    <input type="text" id="dayDescription" class="form-input" placeholder="Ex: EUR/USD, DAX...">
                 </div>
-                <div class="form-actions">
-                    <button type="button" class="button btn-secondary" onclick="closeTransaction()">Cancelar</button>
-                    <button type="submit" class="button btn-primary">Salvar</button>
+                <div class="form-buttons">
+                    <button type="button" class="button btn-secondary" onclick="closeNewDay()">Cancelar</button>
+                    <button type="submit" class="button btn-primary">Criar Dia</button>
                 </div>
             </form>
         </div>
     </div>
     
-    <!-- Modal para saldo inicial -->
-    <div class="modal" id="initialBalanceModal">
+    <!-- Modal: Adicionar Transação -->
+    <div id="transactionModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">Configurar saldo inicial</div>
-            <form onsubmit="saveInitialBalance(event)">
+            <div class="modal-title">Adicionar Operação</div>
+            <form onsubmit="saveTransaction(event)">
                 <div class="form-group">
-                    <label class="form-label">Saldo inicial ($)</label>
-                    <input type="number" class="form-input" id="initialBalance" placeholder="1000.00" step="0.01" inputmode="decimal" required>
+                    <label class="form-label">Valor</label>
+                    <input type="number" id="transactionAmount" class="form-input" placeholder="Ex: 50.00" step="0.01" required>
                 </div>
-                <div class="form-actions">
-                    <button type="submit" class="button btn-primary" style="flex: 1;">Confirmar</button>
+                <div class="form-group">
+                    <label class="form-label">Tipo</label>
+                    <select id="transactionType" class="form-input">
+                        <option value="gain">Ganho (+)</option>
+                        <option value="loss">Perda (-)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descrição</label>
+                    <input type="text" id="transactionDesc" class="form-input" placeholder="Ex: Scalping, Swing Trade...">
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="button btn-secondary" onclick="closeTransaction()">Cancelar</button>
+                    <button type="submit" class="button btn-primary">Salvar Operação</button>
                 </div>
             </form>
-        </div>
-    </div>
-    
-    <!-- Modal para ver histórico -->
-    <div class="modal" id="historyModal">
-        <div class="modal-content">
-            <div class="modal-header" id="historyTitle">Histórico</div>
-            <div id="transactionsList" class="transactions-list"></div>
-            <div class="form-actions" style="margin-top: 1rem;">
-                <button class="button btn-secondary" style="flex: 1;" onclick="closeHistory()">Fechar</button>
-            </div>
         </div>
     </div>
 
     <script>
-        let currentAccount = null;
-        
-        const defaultData = {
-            accounts: {
-                account1: {
-                    name: 'Conta 1',
-                    initialBalance: 0,
-                    currentBalance: 0,
-                    transactions: []
-                },
-                account2: {
-                    name: 'Conta 2',
-                    initialBalance: 0,
-                    currentBalance: 0,
-                    transactions: []
-                }
-            }
-        };
+        let currentDay = null;
         
         function loadData() {
-            const stored = localStorage.getItem('forexData');
-            return stored ? JSON.parse(stored) : defaultData;
+            return JSON.parse(localStorage.getItem('traderVaultData')) || {
+                initialBalance: 0,
+                tradingDays: []
+            };
         }
         
         function saveData(data) {
-            localStorage.setItem('forexData', JSON.stringify(data));
+            localStorage.setItem('traderVaultData', JSON.stringify(data));
             render();
         }
         
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('accountsTab').style.display = 'none';
-            document.getElementById('configTab').style.display = 'none';
-            
-            if (tab === 'accounts') {
-                document.querySelectorAll('.tab')[0].classList.add('active');
-                document.getElementById('accountsTab').style.display = 'block';
-            } else {
-                document.querySelectorAll('.tab')[1].classList.add('active');
-                document.getElementById('configTab').style.display = 'block';
-            }
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
         }
         
-        function selectAccount(accountId) {
+        function openNewDay() {
             const data = loadData();
-            if (data.accounts[accountId].initialBalance === 0) {
-                currentAccount = accountId;
-                document.getElementById('initialBalanceModal').classList.add('active');
-                setTimeout(() => {
-                    document.getElementById('initialBalance').focus();
-                }, 100);
-            } else {
-                currentAccount = accountId;
-                render();
-            }
-        }
-        
-        function saveInitialBalance(event) {
-            event.preventDefault();
-            const data = loadData();
-            const amount = parseFloat(document.getElementById('initialBalance').value);
-            
-            data.accounts[currentAccount].initialBalance = amount;
-            data.accounts[currentAccount].currentBalance = amount;
-            data.accounts[currentAccount].transactions = [];
-            
-            saveData(data);
-            document.getElementById('initialBalanceModal').classList.remove('active');
-            document.getElementById('initialBalance').value = '';
-        }
-        
-        function openTransaction() {
-            if (!currentAccount) {
-                alert('Selecione uma conta primeiro');
+            if (data.initialBalance === 0) {
+                alert('Configure o saldo inicial primeiro!');
                 return;
             }
+            document.getElementById('newDayModal').classList.add('active');
+            setTimeout(() => document.getElementById('dayNumber').focus(), 100);
+        }
+        
+        function closeNewDay() {
+            document.getElementById('newDayModal').classList.remove('active');
+            document.getElementById('dayNumber').value = '';
+            document.getElementById('dayDescription').value = '';
+        }
+        
+        function saveNewDay(event) {
+            event.preventDefault();
+            const data = loadData();
+            const dayNumber = parseInt(document.getElementById('dayNumber').value);
+            const dayDescription = document.getElementById('dayDescription').value;
+            
+            const newDay = {
+                id: Date.now(),
+                dayNumber,
+                description: dayDescription,
+                transactions: [],
+                createdAt: new Date().toLocaleString('pt-BR')
+            };
+            
+            data.tradingDays.push(newDay);
+            saveData(data);
+            closeNewDay();
+        }
+        
+        function openTransaction(dayId) {
+            currentDay = dayId;
             document.getElementById('transactionModal').classList.add('active');
-            setTimeout(() => {
-                document.getElementById('transactionAmount').focus();
-            }, 100);
+            setTimeout(() => document.getElementById('transactionAmount').focus(), 100);
         }
         
         function closeTransaction() {
             document.getElementById('transactionModal').classList.remove('active');
             document.getElementById('transactionAmount').value = '';
-            document.getElementById('transactionDescription').value = '';
             document.getElementById('transactionType').value = 'gain';
+            document.getElementById('transactionDesc').value = '';
+            currentDay = null;
         }
         
         function saveTransaction(event) {
@@ -643,149 +624,209 @@
             const data = loadData();
             const amount = parseFloat(document.getElementById('transactionAmount').value);
             const type = document.getElementById('transactionType').value;
-            const description = document.getElementById('transactionDescription').value;
+            const desc = document.getElementById('transactionDesc').value;
+            
+            const day = data.tradingDays.find(d => d.id === currentDay);
+            if (!day) return;
             
             const transaction = {
                 id: Date.now(),
                 type,
                 amount,
-                description: description || (type === 'gain' ? 'Ganho' : 'Perda'),
-                date: new Date().toLocaleString('pt-BR')
+                description: desc || (type === 'gain' ? 'Ganho' : 'Perda'),
+                timestamp: new Date().toLocaleString('pt-BR', { hour: '2-digit', minute: '2-digit' })
             };
             
-            data.accounts[currentAccount].transactions.push(transaction);
-            
-            if (type === 'gain') {
-                data.accounts[currentAccount].currentBalance += amount;
-            } else {
-                data.accounts[currentAccount].currentBalance -= amount;
-            }
-            
+            day.transactions.push(transaction);
             saveData(data);
             closeTransaction();
         }
         
-        function openHistory() {
-            if (!currentAccount) return;
-            
+        function deleteTransaction(dayId, transactionId) {
+            if (!confirm('Remover esta operação?')) return;
             const data = loadData();
-            const account = data.accounts[currentAccount];
-            const list = document.getElementById('transactionsList');
-            
-            document.getElementById('historyTitle').textContent = `Histórico - ${account.name}`;
-            
-            if (account.transactions.length === 0) {
-                list.innerHTML = '<div class="transactions-empty">Nenhuma transação registrada</div>';
-            } else {
-                list.innerHTML = account.transactions.reverse().map(t => `
-                    <div class="transaction-item">
-                        <div class="transaction-info">
-                            <div class="transaction-type">${t.description}</div>
-                            <div class="transaction-date">${t.date}</div>
-                        </div>
-                        <div class="transaction-amount ${t.type === 'gain' ? 'balance-positive' : 'balance-negative'}">
-                            ${t.type === 'gain' ? '+' : '-'}$${t.amount.toFixed(2)}
-                        </div>
-                    </div>
-                `).join('');
-                account.transactions.reverse();
-            }
-            
-            document.getElementById('historyModal').classList.add('active');
-        }
-        
-        function closeHistory() {
-            document.getElementById('historyModal').classList.remove('active');
-        }
-        
-        function confirmReset() {
-            if (confirm('ATENÇÃO! Isso vai apagar TODOS os dados. Tem certeza?')) {
-                if (confirm('Tem mesmo certeza? Não tem volta!')) {
-                    localStorage.removeItem('forexData');
-                    currentAccount = null;
-                    render();
-                    alert('Dados resetados com sucesso!');
-                }
+            const day = data.tradingDays.find(d => d.id === dayId);
+            if (day) {
+                day.transactions = day.transactions.filter(t => t.id !== transactionId);
+                saveData(data);
             }
         }
         
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('data:application/javascript,' + 
-                encodeURIComponent(`self.addEventListener('install', () => self.skipWaiting());
-                                   self.addEventListener('activate', () => self.clients.claim());`)
-            ).catch(() => {});
+        function deleteDay(dayId) {
+            if (!confirm('Remover este dia de trading?')) return;
+            const data = loadData();
+            data.tradingDays = data.tradingDays.filter(d => d.id !== dayId);
+            saveData(data);
+        }
+        
+        function toggleDay(dayId) {
+            const dayEl = document.getElementById(`day-${dayId}`);
+            dayEl.classList.toggle('expanded');
+        }
+        
+        function saveInitialBalance() {
+            const amount = parseFloat(document.getElementById('configInitialBalance').value);
+            if (!amount || amount <= 0) {
+                alert('Insira um valor válido');
+                return;
+            }
+            const data = loadData();
+            data.initialBalance = amount;
+            data.tradingDays = [];
+            saveData(data);
+            alert('Saldo inicial configurado!');
+            document.getElementById('configInitialBalance').value = '';
+        }
+        
+        function calculateStats() {
+            const data = loadData();
+            if (data.initialBalance === 0) {
+                return { current: 0, result: 0, percent: 0 };
+            }
+            
+            let totalResult = 0;
+            data.tradingDays.forEach(day => {
+                day.transactions.forEach(t => {
+                    if (t.type === 'gain') {
+                        totalResult += t.amount;
+                    } else {
+                        totalResult -= t.amount;
+                    }
+                });
+            });
+            
+            const currentBalance = data.initialBalance + totalResult;
+            const percent = (totalResult / data.initialBalance) * 100;
+            
+            return { current: currentBalance, result: totalResult, percent };
+        }
+        
+        function formatPercent(value, initialBalance) {
+            if (initialBalance === 0) return '0.00%';
+            const percent = (value / initialBalance) * 100;
+            return (percent > 0 ? '+' : '') + percent.toFixed(2) + '%';
         }
         
         function render() {
             const data = loadData();
-            const grid = document.getElementById('accountsGrid');
+            const stats = calculateStats();
             
-            let totalBalance = 0;
-            Object.entries(data.accounts).forEach(([id, account]) => {
-                totalBalance += account.currentBalance;
-            });
+            // Atualizar overview
+            document.getElementById('initialBalance').textContent = `$${data.initialBalance.toFixed(2)}`;
+            document.getElementById('currentBalance').textContent = `$${stats.current.toFixed(2)}`;
+            document.getElementById('currentBalance').className = `overview-value ${stats.result >= 0 ? 'balance-positive' : 'balance-negative'}`;
+            document.getElementById('totalResult').textContent = `${stats.result >= 0 ? '+' : ''}$${stats.result.toFixed(2)}`;
+            document.getElementById('totalResult').className = `overview-value ${stats.result >= 0 ? 'balance-positive' : 'balance-negative'}`;
+            document.getElementById('totalPercent').textContent = formatPercent(stats.result, data.initialBalance);
+            document.getElementById('totalPercent').className = `overview-value ${stats.result >= 0 ? 'balance-positive' : 'balance-negative'}`;
             
-            document.getElementById('totalBalance').textContent = `$${totalBalance.toFixed(2)}`;
+            document.getElementById('configInitialBalance').value = data.initialBalance;
             
-            grid.innerHTML = Object.entries(data.accounts).map(([id, account]) => {
-                const profit = account.currentBalance - account.initialBalance;
-                const profitPercent = account.initialBalance > 0 
-                    ? ((profit / account.initialBalance) * 100).toFixed(2)
-                    : 0;
+            // Renderizar dias
+            const listEl = document.getElementById('tradingDaysList');
+            if (data.tradingDays.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <p>Nenhum dia de trading registrado</p>
+                        <p style="font-size: 12px; margin-top: 0.5rem;">Clique em "Novo Dia de Trading" para começar</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            listEl.innerHTML = data.tradingDays.sort((a, b) => a.dayNumber - b.dayNumber).map(day => {
+                let dayResult = 0;
+                day.transactions.forEach(t => {
+                    if (t.type === 'gain') {
+                        dayResult += t.amount;
+                    } else {
+                        dayResult -= t.amount;
+                    }
+                });
+                
+                const dayPercent = formatPercent(dayResult, data.initialBalance);
                 
                 return `
-                    <div class="account-card ${currentAccount === id ? 'active' : ''}" onclick="selectAccount('${id}')">
-                        <div class="account-header">
-                            <div class="account-name">${account.name}</div>
-                            ${account.initialBalance > 0 ? `<div class="account-badge">Ativa</div>` : ''}
+                    <div class="trading-day" id="day-${day.id}">
+                        <div class="trading-day-header" onclick="toggleDay(${day.id})">
+                            <div>
+                                <div class="trading-day-title">Dia ${day.dayNumber}</div>
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 0.25rem;">${day.description || 'Sem descrição'}</div>
+                            </div>
+                            <div class="trading-day-stats">
+                                <div class="trading-day-stat ${dayResult >= 0 ? 'balance-positive' : 'balance-negative'}">
+                                    ${dayResult >= 0 ? '+' : ''}$${dayResult.toFixed(2)}
+                                </div>
+                                <div class="trading-day-stat ${dayResult >= 0 ? 'balance-positive' : 'balance-negative'}">
+                                    ${dayPercent}
+                                </div>
+                            </div>
                         </div>
                         
-                        ${account.initialBalance > 0 ? `
-                            <div class="balance-display">
-                                <div class="balance-label">Saldo atual</div>
-                                <div class="balance-value ${account.currentBalance >= account.initialBalance ? 'balance-positive' : 'balance-negative'}">
-                                    $${account.currentBalance.toFixed(2)}
-                                </div>
-                            </div>
+                        <div class="trading-day-content">
+                            ${day.transactions.length === 0 ? 
+                                `<div style="text-align: center; padding: 2rem 1rem; color: var(--text-secondary); font-size: 13px;">Nenhuma operação registrada</div>` :
+                                day.transactions.map(t => {
+                                    const transPercent = formatPercent(t.type === 'gain' ? t.amount : -t.amount, data.initialBalance);
+                                    return `
+                                        <div class="transaction-item">
+                                            <div class="transaction-info">
+                                                <div class="transaction-desc">${t.description}</div>
+                                                <div class="transaction-percent">${t.timestamp} • ${transPercent}</div>
+                                            </div>
+                                            <div class="transaction-amount">
+                                                <div class="transaction-value ${t.type === 'gain' ? 'balance-positive' : 'balance-negative'}">
+                                                    ${t.type === 'gain' ? '+' : '-'}$${t.amount.toFixed(2)}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')
+                            }
                             
-                            <div class="stats-row">
-                                <div class="stat">
-                                    <div class="stat-label">Inicial</div>
-                                    <div class="stat-value">$${account.initialBalance.toFixed(2)}</div>
-                                </div>
-                                <div class="stat">
-                                    <div class="stat-label">Lucro/Perda</div>
-                                    <div class="stat-value ${profit >= 0 ? 'balance-positive' : 'balance-negative'}">
-                                        ${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}
+                            <div class="day-summary">
+                                <div class="day-summary-item">
+                                    <div class="day-summary-label">Resultado</div>
+                                    <div class="day-summary-value ${dayResult >= 0 ? 'balance-positive' : 'balance-negative'}">
+                                        ${dayResult >= 0 ? '+' : ''}$${dayResult.toFixed(2)}
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <div class="stats-row">
-                                <div class="stat">
-                                    <div class="stat-label">%</div>
-                                    <div class="stat-value ${profit >= 0 ? 'balance-positive' : 'balance-negative'}">
-                                        ${profitPercent > 0 ? '+' : ''}${profitPercent}%
+                                <div class="day-summary-item">
+                                    <div class="day-summary-label">% do Inicial</div>
+                                    <div class="day-summary-value ${dayResult >= 0 ? 'balance-positive' : 'balance-negative'}">
+                                        ${dayPercent}
                                     </div>
-                                </div>
-                                <div class="stat">
-                                    <div class="stat-label">Operações</div>
-                                    <div class="stat-value">${account.transactions.length}</div>
                                 </div>
                             </div>
                             
                             <div class="action-buttons">
-                                <button class="button btn-success btn-small" onclick="event.stopPropagation(); openTransaction()">+ Adicionar</button>
-                                <button class="button btn-secondary btn-small" onclick="event.stopPropagation(); openHistory()">📋 Histórico</button>
+                                <button class="button btn-success btn-small" onclick="openTransaction(${day.id})">+ Operação</button>
+                                <button class="button btn-secondary btn-small" onclick="deleteDay(${day.id})">🗑️</button>
                             </div>
-                        ` : `
-                            <div style="text-align: center; padding: 1.5rem 0; color: var(--text-secondary); font-size: 13px;">
-                                Clique para configurar
-                            </div>
-                        `}
+                        </div>
                     </div>
                 `;
             }).join('');
+        }
+        
+        function exportData() {
+            const data = loadData();
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tradervault-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+        
+        function confirmReset() {
+            if (!confirm('Limpar TODOS os dados? Não tem volta!')) return;
+            if (!confirm('Tem MESMO certeza?')) return;
+            localStorage.removeItem('traderVaultData');
+            render();
+            alert('Dados apagados!');
         }
         
         window.addEventListener('load', render);
