@@ -3,194 +3,587 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prop Desk Manager</title>
+<title>Prop Desk</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.js"></script>
 <style>
-  :root { color-scheme: dark; }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: #0d1014; color: #e6e8eb;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    padding: 2.5rem 1rem;
+  :root{
+    --bg:#0b0d11; --surf:#12151c; --surf2:#181c25; --line:#232834;
+    --txt:#e7e9ee; --mut:#8b93a4; --gold:#dcb36b; --gain:#34d39a; --loss:#f2766e;
+    --demo:#f5b94e; --blue:#60a5fa;
   }
-  main { max-width: 960px; margin: 0 auto; }
-  h1 { font-size: 1.25rem; margin: 0 0 1.5rem; border-bottom: 1px solid #27272a; padding-bottom: .75rem; }
-  h2 { font-size: 1rem; font-weight: 500; margin: 0 0 1rem; }
-  section { margin-bottom: 2.5rem; }
-  .panel { border: 1px solid #27272a; border-radius: 8px; padding: 1.25rem; background: #09090b; }
-  form { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
-  label { display: flex; flex-direction: column; gap: .35rem; font-size: .85rem; color: #a1a1aa; }
-  input {
-    background: #18181b; border: 1px solid #3f3f46; border-radius: 6px;
-    color: #f4f4f5; padding: .5rem .7rem; font: inherit;
-  }
-  input:focus, button:focus-visible { outline: 2px solid #71717a; outline-offset: 2px; }
-  .ambiente { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
-  .ambiente button {
-    background: transparent; color: #71717a; border: 1px solid #3f3f46; border-radius: 6px;
-    padding: .5rem; font: inherit; font-weight: 600; letter-spacing: .05em; cursor: pointer;
-  }
-  .ambiente button.demo[aria-pressed="true"] { color: #fcd34d; border: 1px dashed #fbbf24; background: rgba(251,191,36,.08); }
-  .ambiente button.real[aria-pressed="true"] { color: #6ee7b7; border: 1px solid #10b981; background: rgba(16,185,129,.12); }
-  .acoes { grid-column: 1 / -1; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .btn {
-    background: #f4f4f5; color: #18181b; border: 0; border-radius: 6px;
-    padding: .55rem 1rem; font: inherit; font-weight: 600; cursor: pointer;
-  }
-  .btn:disabled { opacity: .5; cursor: not-allowed; }
-  .aviso { font-size: .9rem; }
-  .ok { color: #34d399; } .erro { color: #f87171; }
-  .vazio { border: 1px dashed #27272a; border-radius: 8px; padding: 1.5rem; color: #71717a; font-size: .9rem; }
-  .tabela-wrap { overflow-x: auto; border: 1px solid #27272a; border-radius: 8px; }
-  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-  th, td { padding: .6rem .9rem; text-align: left; border-bottom: 1px solid #27272a; white-space: nowrap; }
-  th { color: #a1a1aa; font-weight: 500; background: #18181b; }
-  tbody tr:last-child td { border-bottom: 0; }
-  td.num { text-align: right; font-variant-numeric: tabular-nums; }
-  .tag { font-size: .75rem; font-weight: 700; padding: .15rem .5rem; border-radius: 4px; letter-spacing: .05em; }
-  .tag.DEMO { color: #fcd34d; border: 1px dashed #fbbf24; }
-  .tag.REAL { color: #6ee7b7; border: 1px solid #10b981; background: rgba(16,185,129,.15); }
-  .muted { color: #a1a1aa; }
-  @media (max-width: 600px) { form { grid-template-columns: 1fr; } }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#1a1f2b 0%,var(--bg) 60%);color:var(--txt);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;font-size:15px;line-height:1.45}
+  h1,h2,h3,.big,.serif{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-weight:500;letter-spacing:-.01em;margin:0}
+  h1{font-size:1.6rem} h2{font-size:1.2rem} h3{font-size:1rem;color:var(--mut);font-family:system-ui,sans-serif;font-weight:500;margin-bottom:.8rem}
+  .mut{color:var(--mut)} .sm{font-size:.8rem}
+  .pos{color:var(--gain)!important} .neg{color:var(--loss)!important}
+  .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+  header.top{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;padding:1rem 1.25rem;border-bottom:1px solid var(--line);
+    position:sticky;top:0;background:rgba(11,13,17,.85);backdrop-filter:blur(8px);z-index:5}
+  .brand{display:flex;align-items:center;gap:.6rem;font-family:"Iowan Old Style",Georgia,serif;font-size:1.2rem;margin-right:auto}
+  .brand i{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 14px var(--gold)}
+  nav{display:flex;gap:.25rem}
+  nav button{background:none;border:0;color:var(--mut);padding:.5rem .8rem;border-radius:6px;font:inherit;cursor:pointer}
+  nav button.ativo{color:var(--txt);background:var(--surf2)}
+
+  .env{display:flex;background:var(--surf);border:1px solid var(--line);border-radius:999px;padding:3px}
+  .env button{background:none;border:1px dashed transparent;color:var(--mut);font:inherit;font-weight:700;letter-spacing:.08em;
+    padding:.35rem 1rem;border-radius:999px;cursor:pointer}
+  .env button.demo[aria-pressed="true"]{color:var(--demo);border-color:var(--demo);background:rgba(245,185,78,.08)}
+  .env button.real[aria-pressed="true"]{color:#052e1f;background:var(--gain)}
+
+  .banner{background:rgba(245,185,78,.08);border-bottom:1px solid rgba(245,185,78,.3);color:var(--demo);
+    padding:.5rem 1.25rem;font-size:.85rem;text-align:center}
+
+  main{max-width:1120px;margin:0 auto;padding:1.5rem 1.25rem 4rem}
+  section{display:grid;gap:1.25rem}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+  select,input{background:var(--surf2);border:1px solid #2c3240;border-radius:8px;color:var(--txt);padding:.55rem .7rem;font:inherit;min-width:0}
+  input:focus,select:focus,button:focus-visible{outline:2px solid #4b5366;outline-offset:2px}
+
+  .panel{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:1.25rem}
+  .metricas{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+  .card{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:1.1rem 1.2rem}
+  .card .lbl{color:var(--mut);font-size:.85rem}
+  .card .big{font-size:1.8rem;margin:.35rem 0 .2rem;font-variant-numeric:tabular-nums}
+  .duas{display:grid;grid-template-columns:1.5fr 1fr;gap:1rem}
+  @media(max-width:860px){.metricas{grid-template-columns:repeat(2,1fr)}.duas{grid-template-columns:1fr}}
+  @media(max-width:520px){.metricas{grid-template-columns:1fr 1fr;gap:.6rem}.card .big{font-size:1.3rem}
+    header.top{justify-content:center}.brand{margin-right:0;width:100%;justify-content:center}}
+
+  .grafico{width:100%;height:auto}
+  .linha{fill:none;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+  .linha.resultado{stroke:var(--gold)} .linha.caixa{stroke:var(--blue)}
+  .eixo{stroke:#2a303c;stroke-dasharray:4 4}
+  .legenda{display:flex;gap:1rem;font-size:.8rem;color:var(--mut);margin-top:.5rem}
+  .legenda span::before{content:"";display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:.4rem;vertical-align:middle}
+  .legenda .res::before{background:var(--gold)} .legenda .cx::before{background:var(--blue)}
+
+  .lista-mov{list-style:none;margin:0;padding:0}
+  .lista-mov li{display:flex;justify-content:space-between;gap:.5rem;padding:.6rem 0;border-bottom:1px solid var(--line);font-size:.9rem}
+  .lista-mov li:last-child{border-bottom:0}
+
+  .tabela{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th,td{padding:.7rem .85rem;text-align:left;border-bottom:1px solid var(--line)}
+  th{color:var(--mut);font-weight:500;background:var(--surf2);font-size:.8rem;white-space:nowrap}
+  tr:last-child td{border-bottom:0}
+  tr.clicavel{cursor:pointer} tr.clicavel:hover td{background:rgba(255,255,255,.025)}
+
+  .estado{font-size:.75rem;padding:.2rem .55rem;border-radius:999px;border:1px solid}
+  .e-curso{color:var(--gold);border-color:rgba(220,179,107,.4)}
+  .e-aprov{color:var(--gain);border-color:rgba(52,211,154,.4)}
+  .e-rep{color:var(--loss);border-color:rgba(242,118,110,.4)}
+  .tag{font-size:.7rem;font-weight:700;letter-spacing:.08em;padding:.15rem .5rem;border-radius:5px}
+  .tag.DEMO{color:var(--demo);border:1px dashed var(--demo)}
+  .tag.REAL{color:#052e1f;background:var(--gain)}
+
+  .barra{height:6px;background:#242a36;border-radius:99px;overflow:hidden;min-width:120px}
+  .barra span{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#f0d08f);border-radius:99px}
+  .barra.perda span{background:var(--loss)}
+
+  .grid-form{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem}
+  .grid-form label,.form label{display:flex;flex-direction:column;gap:.35rem;font-size:.82rem;color:var(--mut)}
+  .acoes{grid-column:1/-1;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+  @media(max-width:860px){.grid-form{grid-template-columns:1fr 1fr}}
+  @media(max-width:520px){.grid-form{grid-template-columns:1fr}}
+
+  .btn{background:var(--gold);color:#1a1405;border:0;border-radius:8px;padding:.6rem 1.1rem;font:inherit;font-weight:600;cursor:pointer}
+  .btn:disabled{opacity:.5;cursor:wait}
+  .ghost{background:none;border:1px solid #2c3240;color:var(--txt);border-radius:8px;padding:.5rem .9rem;font:inherit;cursor:pointer}
+  .ghost.perigo{color:var(--loss);border-color:rgba(242,118,110,.35)}
+  .link{background:none;border:0;color:var(--loss);cursor:pointer;font:inherit;font-size:.85rem}
+
+  .det-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
+  .det-head .acoes-det{display:flex;gap:.5rem;flex-wrap:wrap}
+  .mini{display:grid;grid-template-columns:repeat(6,1fr);gap:.8rem;margin-bottom:1.25rem}
+  .mini div{background:var(--surf2);border-radius:10px;padding:.75rem .85rem}
+  .mini span{display:block;color:var(--mut);font-size:.78rem}
+  .mini strong{font-weight:600;font-variant-numeric:tabular-nums;font-size:1rem}
+  .mini small{font-weight:500;font-size:.8rem;color:var(--mut)}
+  @media(max-width:860px){.mini{grid-template-columns:repeat(3,1fr)}}
+  .metas{display:grid;gap:.9rem;margin-bottom:1.25rem}
+  .metas .linha-meta{display:grid;grid-template-columns:200px 1fr;gap:1rem;align-items:center;font-size:.88rem}
+  @media(max-width:520px){.metas .linha-meta{grid-template-columns:1fr}}
+  .alerta{color:var(--loss);font-size:.85rem}
+  .det-cols{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem}
+  .bloco{background:var(--surf2);border-radius:12px;padding:1rem}
+  .form{display:grid;gap:.75rem}
+  .form .dupla{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+  @media(max-width:860px){.det-cols{grid-template-columns:1fr}}
+
+  .vazio{border:1px dashed #2a3040;border-radius:12px;padding:1.5rem;color:var(--mut);text-align:center;font-size:.9rem;display:grid;gap:.8rem;justify-items:center}
+  .vazio.grande{padding:3rem 1.5rem}
+
+  .toast{position:fixed;left:50%;bottom:1.25rem;transform:translateX(-50%);background:var(--surf2);border:1px solid #2c3240;
+    padding:.7rem 1.1rem;border-radius:10px;font-size:.9rem;max-width:90vw;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:9}
+  .toast.ok{border-color:rgba(52,211,154,.5);color:var(--gain)}
+  .toast.erro{border-color:rgba(242,118,110,.5);color:var(--loss)}
 </style>
 </head>
 <body>
-<main>
-  <h1>Prop Desk Manager</h1>
 
-  <section>
-    <div class="panel">
-      <h2>Nova conta</h2>
-      <form id="form">
-        <label>Nome da conta *
-          <input id="nome" placeholder="Ex.: Desafio 100k fase 1" required>
-        </label>
-        <label>Prop Firm
-          <input id="prop_firm" placeholder="Opcional">
-        </label>
-        <div>
-          <span class="muted" style="font-size:.85rem">Ambiente *</span>
-          <div class="ambiente" style="margin-top:.35rem">
-            <button type="button" class="demo" data-amb="DEMO" aria-pressed="true">DEMO</button>
-            <button type="button" class="real" data-amb="REAL" aria-pressed="false">REAL</button>
-          </div>
-        </div>
-        <label>Moeda
-          <input id="moeda" value="USD" maxlength="3">
-        </label>
-        <label>Saldo inicial
-          <input id="saldo" value="0" inputmode="decimal">
-        </label>
-        <div class="acoes">
-          <button class="btn" id="btn-guardar" type="submit">Guardar conta</button>
-          <span id="aviso" class="aviso" role="status"></span>
-        </div>
-      </form>
+<header class="top">
+  <div class="brand"><i></i>Prop Desk</div>
+  <nav>
+    <button data-vista="painel">Painel</button>
+    <button data-vista="contas">Contas</button>
+  </nav>
+  <div class="env" role="group" aria-label="Ambiente">
+    <button class="demo" data-amb="DEMO" aria-pressed="true">DEMO</button>
+    <button class="real" data-amb="REAL" aria-pressed="false">REAL</button>
+  </div>
+</header>
+
+<div id="banner" class="banner">Ambiente de simulação. Estes valores não são dinheiro real.</div>
+
+<main>
+  <section id="painel">
+    <div class="toolbar">
+      <h1>Visão geral</h1>
+      <select id="moeda-sel" aria-label="Moeda"></select>
     </div>
+    <div id="conteudo-painel"></div>
   </section>
 
-  <section>
-    <h2>Contas guardadas <span id="contador" class="muted" style="font-weight:400"></span></h2>
-    <div id="lista"></div>
+  <section id="contas" hidden>
+    <div class="panel">
+      <h2 style="margin-bottom:1rem">Nova conta</h2>
+      <form id="f-nova" class="grid-form">
+        <label>Nome *<input name="nome" required placeholder="Ex.: 100k fase 1"></label>
+        <label>Prop Firm<input name="prop_firm" placeholder="Opcional"></label>
+        <label>Moeda<input name="moeda" value="USD" maxlength="3"></label>
+        <label>Capital (saldo inicial) *<input name="capital" inputmode="decimal" placeholder="100000"></label>
+        <label>Fase
+          <select name="fase">
+            <option>1ª fase</option><option>2ª fase</option><option>Funded</option>
+          </select>
+        </label>
+        <label>Meta de ganho (%)<input name="meta_ganho" inputmode="decimal" placeholder="ex.: 10"></label>
+        <label>Perda máxima (%)<input name="meta_perda" inputmode="decimal" placeholder="ex.: 5"></label>
+        <div class="acoes"><button class="btn" type="submit">Criar conta</button></div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2 style="margin-bottom:1rem">Contas</h2>
+      <div id="lista"></div>
+    </div>
+
+    <div id="detalhe" class="panel" hidden></div>
   </section>
 </main>
 
-<script>
-  // ===== CONFIGURAÇÃO: preenche com os valores do teu projeto Supabase =====
-  // Supabase → Project Settings → API Keys
-  const SUPABASE_URL = "https://xlgkyxvpzebvbrptnkjc.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_FSeqNkQRZVDTnbhg_S2oRQ_O7M5He6W"; // chave pública. Nunca a chave secreta.
-  // =========================================================================
+<div id="toast" class="toast" hidden></div>
 
+<script>
+  // ===== Supabase =====
+  const SUPABASE_URL = "https://xlgkyxvpzebvbrptnkjc.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_FSeqNkQRZVDTnbhg_S2oRQ_O7M5He6W";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const form = document.getElementById("form");
-  const btn = document.getElementById("btn-guardar");
-  const aviso = document.getElementById("aviso");
-  const lista = document.getElementById("lista");
-  const contador = document.getElementById("contador");
-  let ambiente = "DEMO";
+  // ===== Estado =====
+  const S = { amb: "DEMO", vista: "painel", moeda: null, contaId: null, contas: [], movs: [], busy: false };
 
-  function mostrarAviso(texto, tipo) {
-    aviso.textContent = texto;
-    aviso.className = "aviso " + tipo;
+  // ===== Utilitários =====
+  const $ = s => document.querySelector(s);
+  const esc = t => String(t ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const num = v => Number(v) || 0;
+  const clamp = v => Math.max(0, Math.min(100, v));
+  const soma = (ms, tipo) => ms.filter(m => m.tipo === tipo).reduce((s, m) => s + num(m.valor), 0);
+  const parse = s => {
+    const t = String(s ?? "").trim().replace(/\s/g, "").replace(",", ".");
+    if (t === "") return null;
+    const n = Number(t);
+    return Number.isFinite(n) ? n : NaN;
+  };
+  const hoje = () => new Date().toISOString().slice(0, 10);
+  const dinheiro = (v, moeda) => {
+    try { return new Intl.NumberFormat("pt-PT", { style: "currency", currency: moeda || "USD" }).format(num(v)); }
+    catch { return `${num(v).toFixed(2)} ${moeda || ""}`; }
+  };
+  const pct = v => v == null ? "—" : `${v > 0 ? "+" : ""}${v.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+  const sinal = v => v > 0 ? "pos" : v < 0 ? "neg" : "";
+  const dataPT = d => new Date(d + "T00:00:00").toLocaleDateString("pt-PT");
+  const opts = (lista, atual) => lista.map(o => `<option ${o === atual ? "selected" : ""}>${esc(o)}</option>`).join("");
+  const FASES = ["1ª fase", "2ª fase", "Funded"];
+  const ESTADOS = ["Em curso", "Aprovada", "Reprovada"];
+  const TIPOS = { resultado: "Ganho / perda", taxa: "Taxa do desafio", saque: "Saque" };
+
+  function toast(texto, tipo = "ok") {
+    const el = $("#toast");
+    el.textContent = texto;
+    el.className = `toast ${tipo}`;
+    el.hidden = false;
+    clearTimeout(toast.t);
+    toast.t = setTimeout(() => (el.hidden = true), 4000);
   }
 
-  document.querySelectorAll(".ambiente button").forEach(b => {
-    b.addEventListener("click", () => {
-      ambiente = b.dataset.amb;
-      document.querySelectorAll(".ambiente button").forEach(x =>
-        x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+  // ===== Cálculos (uma só fonte de verdade) =====
+  function calc(c) {
+    const ms = S.movs.filter(m => m.conta_id === c.id);
+    const capital = num(c.saldo_inicial);
+    const res = soma(ms, "resultado");
+    const taxas = soma(ms, "taxa");
+    const saques = soma(ms, "saque");
+    const rent = capital ? (res / capital) * 100 : null;
+    const progresso = c.meta_ganho_pct && rent != null ? clamp((rent / c.meta_ganho_pct) * 100) : null;
+    const limitePerda = c.meta_perda_pct != null && rent != null && rent <= -num(c.meta_perda_pct);
+    return { ms, capital, res, taxas, saques, rent, progresso, limitePerda,
+             lucro: saques - taxas, saldoAtual: capital + res };
+  }
+
+  const contasAmb = () => S.contas.filter(c => c.ambiente === S.amb);
+  const moedas = () => [...new Set(contasAmb().map(c => c.moeda))];
+
+  // ===== Carregar dados =====
+  async function carregar() {
+    const [a, b] = await Promise.all([
+      sb.from("contas").select("*").order("created_at", { ascending: false }),
+      sb.from("movimentos").select("*").order("data", { ascending: false }).order("created_at", { ascending: false }),
+    ]);
+    if (a.error || b.error) {
+      toast("Erro ao carregar: " + (a.error || b.error).message, "erro");
+      return;
+    }
+    S.contas = a.data;
+    S.movs = b.data;
+    render();
+  }
+
+  // ===== Render =====
+  function render() {
+    document.querySelectorAll("[data-amb]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.amb === S.amb)));
+    document.querySelectorAll("[data-vista]").forEach(b => b.classList.toggle("ativo", b.dataset.vista === S.vista));
+    $("#banner").hidden = S.amb !== "DEMO";
+    $("#painel").hidden = S.vista !== "painel";
+    $("#contas").hidden = S.vista !== "contas";
+    const ms = moedas();
+    if (!ms.includes(S.moeda)) S.moeda = ms[0] ?? null;
+    if (S.vista === "painel") renderPainel(); else renderContas();
+  }
+
+  function card(label, valor, sub, cls = "") {
+    return `<div class="card"><div class="lbl">${label}</div><div class="big ${cls}">${valor}</div><div class="sm mut">${sub}</div></div>`;
+  }
+
+  function renderPainel() {
+    const ms = moedas();
+    const sel = $("#moeda-sel");
+    sel.hidden = ms.length === 0;
+    sel.innerHTML = opts(ms, S.moeda);
+    const box = $("#conteudo-painel");
+
+    if (ms.length === 0) {
+      box.innerHTML = `<div class="vazio grande"><p>Ainda não há contas no ambiente ${S.amb}.</p>
+        <button class="btn" data-vista="contas">Criar a primeira conta</button></div>`;
+      return;
+    }
+
+    const cs = contasAmb().filter(c => c.moeda === S.moeda);
+    const d = cs.map(calc);
+    const investido = d.reduce((s, x) => s + x.taxas, 0);
+    const sacado = d.reduce((s, x) => s + x.saques, 0);
+    const trading = d.reduce((s, x) => s + x.res, 0);
+    const lucro = sacado - investido;
+    const roi = investido ? (lucro / investido) * 100 : null;
+    const perdidos = cs.filter(c => c.estado === "Reprovada").length;
+    const emCurso = cs.filter(c => c.estado === "Em curso").length;
+    const aprovadas = cs.filter(c => c.estado === "Aprovada").length;
+    const funded = cs.filter(c => c.fase === "Funded").length;
+    const ids = new Set(cs.map(c => c.id));
+    const recentes = S.movs.filter(m => ids.has(m.conta_id)).slice(0, 8);
+
+    box.innerHTML = `
+      <div class="metricas" style="margin-top:1rem">
+        ${card("Investido em desafios", dinheiro(investido, S.moeda), "Soma das taxas pagas")}
+        ${card("Sacado", dinheiro(sacado, S.moeda), "Saques recebidos")}
+        ${card("Lucro / prejuízo do investimento", dinheiro(lucro, S.moeda), roi != null ? `ROI ${pct(roi)}` : "Sem taxas registadas", sinal(lucro))}
+        ${card("Resultado de trading", dinheiro(trading, S.moeda), "Soma dos ganhos e perdas", sinal(trading))}
+        ${card("Desafios perdidos", perdidos, `${emCurso} em curso · ${aprovadas} aprovadas`, perdidos ? "neg" : "")}
+        ${card("Contas funded", funded, `${cs.length} conta(s) no total`)}
+      </div>
+
+      <div class="duas" style="margin-top:1rem">
+        <div class="panel"><h3>Evolução</h3>${grafico(cs)}</div>
+        <div class="panel"><h3>Atividade recente</h3>
+          ${recentes.length ? `<ul class="lista-mov">${recentes.map(m => {
+            const c = S.contas.find(x => x.id === m.conta_id);
+            const valor = m.tipo === "resultado" ? m.valor : m.tipo === "saque" ? m.valor : -m.valor;
+            return `<li><span><span class="mut sm">${dataPT(m.data)}</span><br>${esc(c?.nome ?? "")} · ${TIPOS[m.tipo]}</span>
+              <span class="num ${sinal(valor)}">${dinheiro(valor, c?.moeda)}</span></li>`;
+          }).join("")}</ul>` : `<p class="mut sm">Sem movimentos ainda.</p>`}
+        </div>
+      </div>`;
+  }
+
+  function grafico(cs) {
+    const ids = new Set(cs.map(c => c.id));
+    const ms = S.movs.filter(m => ids.has(m.conta_id)).slice().reverse();
+    if (ms.length < 2) return `<div class="vazio">Regista pelo menos dois movimentos para ver a evolução.</div>`;
+    let r = 0, k = 0;
+    const pts = ms.map(m => {
+      if (m.tipo === "resultado") r += num(m.valor);
+      else if (m.tipo === "saque") k += num(m.valor);
+      else k -= num(m.valor);
+      return { r, k };
     });
+    const vals = pts.flatMap(p => [p.r, p.k]).concat(0);
+    const min = Math.min(...vals), max = Math.max(...vals), span = (max - min) || 1;
+    const W = 720, H = 240, P = 18;
+    const X = i => P + i * (W - 2 * P) / (pts.length - 1);
+    const Y = v => H - P - ((v - min) / span) * (H - 2 * P);
+    const linha = key => pts.map((p, i) => `${X(i).toFixed(1)},${Y(p[key]).toFixed(1)}`).join(" ");
+    return `<svg class="grafico" viewBox="0 0 ${W} ${H}" role="img" aria-label="Evolução do resultado e do caixa">
+        <line class="eixo" x1="${P}" x2="${W - P}" y1="${Y(0)}" y2="${Y(0)}"/>
+        <polyline class="linha caixa" points="${linha("k")}"/>
+        <polyline class="linha resultado" points="${linha("r")}"/>
+      </svg>
+      <div class="legenda"><span class="res">Resultado de trading</span><span class="cx">Caixa (saques − taxas)</span></div>`;
+  }
+
+  function renderContas() {
+    const cs = contasAmb();
+    const lista = $("#lista");
+    if (cs.length === 0) {
+      lista.innerHTML = `<div class="vazio">Ainda não tens contas em ${S.amb}. Cria a primeira acima.</div>`;
+    } else {
+      lista.innerHTML = `<div class="tabela"><table>
+        <thead><tr>
+          <th>Conta</th><th>Fase</th><th>Estado</th><th class="num">Capital</th>
+          <th class="num">Resultado</th><th>Meta de ganho</th><th class="num">Investido</th><th class="num">Sacado</th>
+        </tr></thead>
+        <tbody>${cs.map(c => {
+          const d = calc(c);
+          const estCls = c.estado === "Aprovada" ? "e-aprov" : c.estado === "Reprovada" ? "e-rep" : "e-curso";
+          const barra = d.progresso == null
+            ? `<span class="mut sm">Sem meta definida</span>`
+            : `<div class="barra ${d.limitePerda ? "perda" : ""}"><span style="width:${d.progresso}%"></span></div>
+               <div class="sm mut">${Math.round(d.progresso)}%${d.limitePerda ? ` · <span class="neg">perda máxima atingida</span>` : ""}</div>`;
+          return `<tr class="clicavel" data-act="abrir" data-id="${c.id}">
+            <td><div>${esc(c.nome)}</div><div class="sm mut">${esc(c.prop_firm || "Sem Prop Firm")}</div></td>
+            <td>${esc(c.fase)}</td>
+            <td><span class="estado ${estCls}">${esc(c.estado)}</span></td>
+            <td class="num">${dinheiro(d.capital, c.moeda)}</td>
+            <td class="num ${sinal(d.res)}">${dinheiro(d.res, c.moeda)}<div class="sm">${pct(d.rent)}</div></td>
+            <td>${barra}</td>
+            <td class="num">${dinheiro(d.taxas, c.moeda)}</td>
+            <td class="num">${dinheiro(d.saques, c.moeda)}</td>
+          </tr>`;
+        }).join("")}</tbody></table></div>`;
+    }
+
+    const det = $("#detalhe");
+    const c = S.contaId && cs.find(x => x.id === S.contaId);
+    det.hidden = !c;
+    if (c) det.innerHTML = detalhe(c);
+  }
+
+  function detalhe(c) {
+    const d = calc(c);
+    const m = c.moeda;
+    const perdaValor = c.meta_perda_pct != null ? d.capital * num(c.meta_perda_pct) / 100 : null;
+    return `
+    <div class="det-head">
+      <div>
+        <div class="sm mut">${esc(c.prop_firm || "Sem Prop Firm")} · ${esc(c.moeda)} · ${esc(c.fase)}</div>
+        <h2>${esc(c.nome)}</h2>
+      </div>
+      <div class="acoes-det">
+        <button class="ghost" data-act="fechar">Fechar</button>
+        <button class="ghost perigo" data-act="apagar" data-id="${c.id}">Apagar conta</button>
+      </div>
+    </div>
+
+    <div class="mini">
+      <div><span>Capital</span><strong>${dinheiro(d.capital, m)}</strong></div>
+      <div><span>Saldo atual</span><strong>${dinheiro(d.saldoAtual, m)}</strong></div>
+      <div><span>Resultado</span><strong class="${sinal(d.res)}">${dinheiro(d.res, m)}</strong> <small class="${sinal(d.res)}">${pct(d.rent)}</small></div>
+      <div><span>Investido</span><strong>${dinheiro(d.taxas, m)}</strong></div>
+      <div><span>Sacado</span><strong>${dinheiro(d.saques, m)}</strong></div>
+      <div><span>Lucro / prejuízo</span><strong class="${sinal(d.lucro)}">${dinheiro(d.lucro, m)}</strong></div>
+    </div>
+
+    <div class="metas">
+      <div class="linha-meta">
+        <span class="mut">Meta de ganho${c.meta_ganho_pct ? ` · ${c.meta_ganho_pct}% (${dinheiro(d.capital * c.meta_ganho_pct / 100, m)})` : ""}</span>
+        ${d.progresso == null
+          ? `<span class="mut sm">Define uma meta de ganho abaixo.</span>`
+          : `<div><div class="barra"><span style="width:${d.progresso}%"></span></div>
+             <div class="sm mut">${pct(d.rent)} de ${c.meta_ganho_pct}%</div></div>`}
+      </div>
+      <div class="linha-meta">
+        <span class="mut">Perda máxima${c.meta_perda_pct != null ? ` · ${c.meta_perda_pct}% (${dinheiro(perdaValor, m)})` : ""}</span>
+        ${c.meta_perda_pct == null
+          ? `<span class="mut sm">Sem limite definido.</span>`
+          : d.limitePerda
+            ? `<span class="alerta">Limite atingido. A conta deve ser considerada reprovada, se for essa a regra.</span>`
+            : `<span class="mut sm">Ainda dentro do limite.</span>`}
+      </div>
+    </div>
+
+    <div class="det-cols">
+      <form id="f-mov" class="bloco form">
+        <h3>Registar movimento</h3>
+        <label>Tipo
+          <select name="tipo">${Object.entries(TIPOS).map(([v, l]) => `<option value="${v}">${l}</option>`).join("")}</select>
+        </label>
+        <div class="dupla">
+          <label>Valor<input name="valor" inputmode="decimal" placeholder="ex.: 250 ou -180" required></label>
+          <label>Data<input name="data" type="date" value="${hoje()}" required></label>
+        </div>
+        <label>Nota (opcional)<input name="nota" placeholder="Ex.: fase 1, trade de segunda"></label>
+        <div><button class="btn" type="submit">Registar</button></div>
+        <p class="sm mut" style="margin:0">Ganhos e perdas: usa valor positivo ou negativo. Taxas e saques: valor positivo.</p>
+      </form>
+
+      <form id="f-estado" class="bloco form">
+        <h3>Fase, estado e metas</h3>
+        <div class="dupla">
+          <label>Fase<select name="fase">${opts(FASES, c.fase)}</select></label>
+          <label>Estado<select name="estado">${opts(ESTADOS, c.estado)}</select></label>
+        </div>
+        <div class="dupla">
+          <label>Meta de ganho (%)<input name="meta_ganho" inputmode="decimal" value="${c.meta_ganho_pct ?? ""}"></label>
+          <label>Perda máxima (%)<input name="meta_perda" inputmode="decimal" value="${c.meta_perda_pct ?? ""}"></label>
+        </div>
+        <div><button class="btn" type="submit">Guardar</button></div>
+      </form>
+    </div>
+
+    <div class="bloco">
+      <h3>Movimentos</h3>
+      ${d.ms.length ? `<div class="tabela"><table>
+        <thead><tr><th>Data</th><th>Tipo</th><th class="num">Valor</th><th class="num">% da conta</th><th>Nota</th><th></th></tr></thead>
+        <tbody>${d.ms.map(x => {
+          const valor = x.tipo === "taxa" ? -num(x.valor) : num(x.valor);
+          const pc = x.tipo === "resultado" && d.capital ? (num(x.valor) / d.capital) * 100 : null;
+          return `<tr>
+            <td>${dataPT(x.data)}</td>
+            <td>${TIPOS[x.tipo]}</td>
+            <td class="num ${x.tipo === "resultado" ? sinal(valor) : ""}">${dinheiro(valor, m)}</td>
+            <td class="num ${sinal(pc)}">${pc == null ? "—" : pct(pc)}</td>
+            <td class="mut">${esc(x.nota ?? "")}</td>
+            <td><button class="link" data-act="apagarMov" data-id="${x.id}">Apagar</button></td>
+          </tr>`;
+        }).join("")}</tbody></table></div>`
+        : `<p class="mut sm">Sem movimentos. Regista a taxa do desafio, os ganhos e as perdas acima.</p>`}
+    </div>`;
+  }
+
+  // ===== Ações =====
+  async function criarConta(f) {
+    const v = Object.fromEntries(new FormData(f));
+    const nome = v.nome.trim();
+    if (!nome) return toast("Indica o nome da conta.", "erro");
+    const capital = parse(v.capital);
+    if (capital == null || Number.isNaN(capital) || capital <= 0) return toast("O capital tem de ser um número maior que zero.", "erro");
+    const mg = parse(v.meta_ganho), mp = parse(v.meta_perda);
+    if (Number.isNaN(mg) || Number.isNaN(mp)) return toast("As metas têm de ser números.", "erro");
+
+    const { data, error } = await sb.from("contas").insert({
+      nome,
+      prop_firm: v.prop_firm.trim() || null,
+      ambiente: S.amb,
+      moeda: v.moeda.trim().toUpperCase() || "USD",
+      saldo_inicial: capital,
+      fase: v.fase,
+      estado: "Em curso",
+      meta_ganho_pct: mg,
+      meta_perda_pct: mp,
+    }).select().single();
+
+    if (error) return toast("A conta não foi guardada: " + error.message, "erro");
+    f.reset();
+    S.contaId = data.id;
+    await carregar();
+    toast(`Conta "${nome}" criada.`);
+  }
+
+  async function addMov(f) {
+    const v = Object.fromEntries(new FormData(f));
+    const valor = parse(v.valor);
+    if (valor == null || Number.isNaN(valor)) return toast("Indica um valor válido.", "erro");
+    if (v.tipo === "resultado" && valor === 0) return toast("Um ganho ou perda não pode ser zero.", "erro");
+    if (v.tipo !== "resultado" && valor <= 0) return toast("Taxas e saques são valores positivos.", "erro");
+
+    const { error } = await sb.from("movimentos").insert({
+      conta_id: S.contaId,
+      tipo: v.tipo,
+      valor,
+      data: v.data || hoje(),
+      nota: v.nota.trim() || null,
+    });
+    if (error) return toast("Não foi registado: " + error.message, "erro");
+    await carregar();
+    toast("Movimento registado.");
+  }
+
+  async function salvarEstado(f) {
+    const v = Object.fromEntries(new FormData(f));
+    const mg = parse(v.meta_ganho), mp = parse(v.meta_perda);
+    if (Number.isNaN(mg) || Number.isNaN(mp)) return toast("As metas têm de ser números.", "erro");
+    const { error } = await sb.from("contas").update({
+      fase: v.fase, estado: v.estado, meta_ganho_pct: mg, meta_perda_pct: mp,
+    }).eq("id", S.contaId);
+    if (error) return toast("Não foi guardado: " + error.message, "erro");
+    await carregar();
+    toast("Estado guardado.");
+  }
+
+  async function apagarConta(id) {
+    const { error } = await sb.from("contas").delete().eq("id", id);
+    if (error) return toast("Não foi apagada: " + error.message, "erro");
+    S.contaId = null;
+    await carregar();
+    toast("Conta apagada.");
+  }
+
+  async function apagarMov(id) {
+    const { error } = await sb.from("movimentos").delete().eq("id", id);
+    if (error) return toast("Não foi apagado: " + error.message, "erro");
+    await carregar();
+  }
+
+  // ===== Eventos =====
+  document.addEventListener("click", async e => {
+    const t = e.target.closest("[data-act],[data-vista],[data-amb]");
+    if (!t) return;
+    if (t.dataset.amb) { S.amb = t.dataset.amb; S.contaId = null; S.moeda = null; return render(); }
+    if (t.dataset.vista) { S.vista = t.dataset.vista; return render(); }
+    switch (t.dataset.act) {
+      case "abrir":
+        S.contaId = t.dataset.id; render();
+        $("#detalhe").scrollIntoView({ behavior: "smooth", block: "start" });
+        break;
+      case "fechar": S.contaId = null; render(); break;
+      case "apagar": if (confirm("Apagar esta conta e todos os seus movimentos?")) await apagarConta(t.dataset.id); break;
+      case "apagarMov": if (confirm("Apagar este movimento?")) await apagarMov(t.dataset.id); break;
+    }
   });
 
-  function escapar(t) {
-    return String(t ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  }
+  document.addEventListener("change", e => {
+    if (e.target.id === "moeda-sel") { S.moeda = e.target.value; renderPainel(); }
+  });
 
-  async function carregar() {
-    lista.innerHTML = '<p class="muted">A carregar…</p>';
-    const { data, error } = await sb.from("contas").select("*").order("created_at", { ascending: false });
-    if (error) {
-      lista.innerHTML = "";
-      mostrarAviso("Não foi possível carregar as contas: " + error.message, "erro");
-      return;
-    }
-    contador.textContent = `(${data.length})`;
-    if (data.length === 0) {
-      lista.innerHTML = '<div class="vazio">Ainda não há contas. Cria a primeira com o formulário acima.</div>';
-      return;
-    }
-    lista.innerHTML = `
-      <div class="tabela-wrap"><table>
-        <thead><tr>
-          <th>Nome</th><th>Prop Firm</th><th>Ambiente</th><th>Moeda</th>
-          <th style="text-align:right">Saldo inicial</th><th>Criada em</th>
-        </tr></thead>
-        <tbody>${data.map(c => `
-          <tr>
-            <td>${escapar(c.nome)}</td>
-            <td class="muted">${escapar(c.prop_firm ?? "—")}</td>
-            <td><span class="tag ${c.ambiente}">${c.ambiente}</span></td>
-            <td class="muted">${escapar(c.moeda)}</td>
-            <td class="num">${Number(c.saldo_inicial).toLocaleString("pt-PT", {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="muted">${new Date(c.created_at).toLocaleString("pt-PT")}</td>
-          </tr>`).join("")}
-        </tbody>
-      </table></div>`;
-  }
-
-  form.addEventListener("submit", async e => {
+  document.addEventListener("submit", async e => {
     e.preventDefault();
-    if (btn.disabled) return;
-
-    const nome = document.getElementById("nome").value.trim();
-    const saldo = Number(document.getElementById("saldo").value.replace(",", "."));
-    if (!nome) return mostrarAviso("Indica o nome da conta.", "erro");
-    if (!Number.isFinite(saldo)) return mostrarAviso("O saldo inicial tem de ser um número.", "erro");
-
-    btn.disabled = true;
-    btn.textContent = "A guardar…";
-    mostrarAviso("", "");
-
-    const { error } = await sb.from("contas").insert({
-      nome,
-      prop_firm: document.getElementById("prop_firm").value.trim() || null,
-      ambiente,
-      moeda: document.getElementById("moeda").value.trim().toUpperCase() || "USD",
-      saldo_inicial: saldo,
-    });
-
-    btn.disabled = false;
-    btn.textContent = "Guardar conta";
-
-    if (error) return mostrarAviso("A conta não foi guardada: " + error.message, "erro");
-
-    mostrarAviso(`Conta "${nome}" guardada no Supabase.`, "ok");
-    form.reset();
-    document.getElementById("moeda").value = "USD";
-    document.getElementById("saldo").value = "0";
-    carregar();
+    if (S.busy) return;
+    const f = e.target;
+    const btn = f.querySelector("button[type=submit]");
+    S.busy = true;
+    if (btn) btn.disabled = true;
+    try {
+      if (f.id === "f-nova") await criarConta(f);
+      else if (f.id === "f-mov") await addMov(f);
+      else if (f.id === "f-estado") await salvarEstado(f);
+    } finally {
+      S.busy = false;
+      if (btn) btn.disabled = false;
+    }
   });
 
   carregar();
