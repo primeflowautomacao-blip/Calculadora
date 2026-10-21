@@ -233,11 +233,12 @@
     const res = soma(ms, "resultado");
     const taxas = soma(todos, "taxa");
     const saques = soma(todos, "saque");
+    const saquesFase = soma(ms, "saque");
     const rent = capital ? (res / capital) * 100 : null;
     const progresso = c.meta_ganho_pct && rent != null ? clamp((rent / c.meta_ganho_pct) * 100) : null;
     const limitePerda = c.meta_perda_pct != null && rent != null && rent <= -num(c.meta_perda_pct);
-    return { ms, capital, res, taxas, saques, rent, progresso, limitePerda,
-             lucro: saques - taxas, saldoAtual: capital + res };
+    return { ms, capital, res, taxas, saques, saquesFase, rent, progresso, limitePerda,
+             lucro: saques - taxas, saldoAtual: capital + res - saquesFase };
   }
 
   const contasAmb = () => S.contas.filter(c => c.ambiente === S.amb);
