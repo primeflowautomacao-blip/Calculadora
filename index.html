@@ -223,12 +223,16 @@
   }
 
   // ===== Cálculos (uma só fonte de verdade) =====
+  // Movimentos da fase atual (a partir de inicio_fase; sem valor = todos)
+  const naFase = (m, c) => !c.inicio_fase || new Date(m.created_at) >= new Date(c.inicio_fase);
+
   function calc(c) {
-    const ms = S.movs.filter(m => m.conta_id === c.id);
+    const todos = S.movs.filter(m => m.conta_id === c.id);
+    const ms = todos.filter(m => naFase(m, c));
     const capital = num(c.saldo_inicial);
     const res = soma(ms, "resultado");
-    const taxas = soma(ms, "taxa");
-    const saques = soma(ms, "saque");
+    const taxas = soma(todos, "taxa");
+    const saques = soma(todos, "saque");
     const rent = capital ? (res / capital) * 100 : null;
     const progresso = c.meta_ganho_pct && rent != null ? clamp((rent / c.meta_ganho_pct) * 100) : null;
     const limitePerda = c.meta_perda_pct != null && rent != null && rent <= -num(c.meta_perda_pct);
@@ -322,7 +326,7 @@
 
   function grafico(cs) {
     const ids = new Set(cs.map(c => c.id));
-    const ms = S.movs.filter(m => ids.has(m.conta_id)).slice().reverse();
+    const ms = S.movs.filter(m => ids.has(m.conta_id) && naFase(m, S.contas.find(x => x.id === m.conta_id))).slice().reverse();
     if (ms.length < 2) return `<div class="vazio">Regista pelo menos dois movimentos para ver a evolução.</div>`;
     let r = 0, k = 0;
     const pts = ms.map(m => {
@@ -526,8 +530,11 @@
     const v = Object.fromEntries(new FormData(f));
     const mg = parse(v.meta_ganho), mp = parse(v.meta_perda);
     if (Number.isNaN(mg) || Number.isNaN(mp)) return toast("As metas têm de ser números.", "erro");
+    const atual = S.contas.find(x => x.id === S.contaId);
+    const mudouFase = atual && atual.fase !== v.fase;
     const { error } = await sb.from("contas").update({
       fase: v.fase, estado: v.estado, meta_ganho_pct: mg, meta_perda_pct: mp,
+      ...(mudouFase ? { inicio_fase: new Date().toISOString() } : {}),
     }).eq("id", S.contaId);
     if (error) return toast("Não foi guardado: " + error.message, "erro");
     await carregar();
