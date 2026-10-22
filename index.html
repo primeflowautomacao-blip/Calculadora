@@ -223,8 +223,8 @@
   }
 
   // ===== Cálculos (uma só fonte de verdade) =====
-  // Movimentos da fase atual (a partir de inicio_fase; sem valor = todos)
-  const naFase = (m, c) => !c.inicio_fase || new Date(m.created_at) >= new Date(c.inicio_fase);
+  // Cada movimento guarda a fase em que foi registado; só conta a fase atual da conta
+  const naFase = (m, c) => m.fase === c.fase;
 
   function calc(c) {
     const todos = S.movs.filter(m => m.conta_id === c.id);
@@ -515,12 +515,14 @@
     if (v.tipo === "resultado" && valor === 0) return toast("Um ganho ou perda não pode ser zero.", "erro");
     if (v.tipo !== "resultado" && valor <= 0) return toast("Taxas e saques são valores positivos.", "erro");
 
+    const conta = S.contas.find(x => x.id === S.contaId);
     const { error } = await sb.from("movimentos").insert({
       conta_id: S.contaId,
       tipo: v.tipo,
       valor,
       data: v.data || hoje(),
       nota: v.nota.trim() || null,
+      fase: conta?.fase ?? null,
     });
     if (error) return toast("Não foi registado: " + error.message, "erro");
     await carregar();
@@ -531,11 +533,8 @@
     const v = Object.fromEntries(new FormData(f));
     const mg = parse(v.meta_ganho), mp = parse(v.meta_perda);
     if (Number.isNaN(mg) || Number.isNaN(mp)) return toast("As metas têm de ser números.", "erro");
-    const atual = S.contas.find(x => x.id === S.contaId);
-    const mudouFase = atual && atual.fase !== v.fase;
     const { error } = await sb.from("contas").update({
       fase: v.fase, estado: v.estado, meta_ganho_pct: mg, meta_perda_pct: mp,
-      ...(mudouFase ? { inicio_fase: new Date().toISOString() } : {}),
     }).eq("id", S.contaId);
     if (error) return toast("Não foi guardado: " + error.message, "erro");
     await carregar();
