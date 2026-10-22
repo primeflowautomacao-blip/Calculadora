@@ -307,7 +307,6 @@
         ${card("Investido em desafios", dinheiro(investido, S.moeda), "Soma das taxas pagas")}
         ${card("Sacado", dinheiro(sacado, S.moeda), "Saques recebidos")}
         ${card("Lucro / prejuízo do investimento", dinheiro(lucro, S.moeda), roi != null ? `ROI ${pct(roi)}` : "Sem taxas registadas", sinal(lucro))}
-        ${card("Resultado de trading", dinheiro(trading, S.moeda), "Soma dos ganhos e perdas", sinal(trading))}
         ${card("Desafios perdidos", perdidos, `${emCurso} em curso · ${aprovadas} aprovadas`, perdidos ? "neg" : "")}
         ${card("Contas funded", funded, `${cs.length} conta(s) no total`)}
       </div>
